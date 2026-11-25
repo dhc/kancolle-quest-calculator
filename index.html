@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>艦これ 定期任務 報酬計算器</title>
+<style>
+:root{color-scheme:dark;--bg:#111827;--panel:#1c2637;--panel2:#222f42;--edge:#334155;--text:#edf2f8;--sub:#aebdd0;--accent:#8dc6ff;--green:#a1e8c7;--red:#fbb6b6}
+*{box-sizing:border-box} body{font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic","Meiryo",sans-serif;background:var(--bg);color:var(--text);margin:0;font-size:14px;line-height:1.55}
+main{max-width:1320px;margin:auto;padding:26px 18px 60px}h1{font-size:25px;letter-spacing:-.02em;margin:0 0 8px}h2{font-size:17px;margin:0 0 12px}p{margin:8px 0}small,.muted{color:var(--sub)}.muted{font-size:12px}
+.header{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}.header p{max-width:800px;color:var(--sub)}
+.panel{background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:17px;margin:17px 0}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center}button,input,select,textarea{font:inherit}button{border:1px solid var(--edge);border-radius:8px;padding:7px 11px;background:var(--panel2);color:var(--text);cursor:pointer}button:hover{border-color:var(--accent)}button.primary{background:#245681;border-color:#3a78af}button.warn{color:var(--red)}.pill{border:1px solid var(--edge);border-radius:999px;padding:3px 9px;color:var(--sub);white-space:nowrap;font-size:12px}
+input[type="text"],input[type="number"],select,textarea{background:#111b2c;color:var(--text);border:1px solid #42516a;border-radius:8px;padding:7px 8px;min-width:0}input[type="checkbox"]{accent-color:#70bfff;width:17px;height:17px;cursor:pointer}label{cursor:pointer}.label{font-size:12px;color:var(--sub)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.stat{border-radius:11px;background:var(--panel2);padding:13px}.stat b{font-size:22px;display:block;font-variant-numeric:tabular-nums}.stat .span{font-size:12px;color:var(--sub)}.stat .year{font-size:12px;color:var(--accent)}
+.selectline{display:flex;flex-wrap:wrap;align-items:center;gap:11px}.selectline>*{min-width:0}.note{padding:9px 12px;border-left:2px solid #7890a8;background:#202c3e;color:var(--sub);border-radius:6px}
+.tableWrap{overflow:auto;max-height:650px;border:1px solid var(--edge);border-radius:9px}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:10px 9px;border-bottom:1px solid #334155;vertical-align:middle}th{position:sticky;top:0;background:#25344a;color:#dce8f7;text-align:left;z-index:2;white-space:nowrap}td strong{font-weight:600}.rowname{min-width:290px}.choicecol{min-width:195px}.resultcol{min-width:170px}.rewardtext{font-variant-numeric:tabular-nums;white-space:nowrap}.inactive{opacity:.53}.blocked{background:rgba(255,165,120,.07)}.blocked-note{color:#f7c89d;font-size:11px;display:block}.schedule{display:flex;flex-direction:column;gap:5px;min-width:155px}.schedule select{font-size:12px;max-width:210px}.schedule small{font-size:11px}.schedule label{font-size:11px}.weekdayrow{display:flex;gap:4px;flex-wrap:wrap}.weekday{display:flex;align-items:center;gap:2px;padding:2px 3px;font-size:11px}.weekday input{width:13px;height:13px}.prereq-box{margin-top:4px;font-size:11px;max-width:360px}.prereq-box summary{cursor:pointer;color:var(--accent)}.prereq-box select{max-width:250px;font-size:11px;width:100%}.parent-chip{display:inline-flex;align-items:center;gap:3px;border:1px solid #506682;border-radius:5px;padding:2px 5px;margin:2px 3px 2px 0}.parent-chip button{font-size:11px;padding:0 4px}.compact-select{max-width:170px}.period{font-size:11px;border:1px solid #506682;padding:2px 5px;border-radius:5px;white-space:nowrap;color:#c5dff7}.tasklabel{font-size:11px;color:var(--sub);display:block}.controls{display:flex;gap:6px;align-items:center}.controls input[type="number"]{width:66px}.choiceStack{display:grid;gap:5px}.choiceStack select{width:100%;max-width:260px;font-size:12px}.source{color:var(--accent);text-decoration:none;font-size:11px}.source:hover{text-decoration:underline}
+.defaults{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.defaults .field{min-width:210px}.defaults .field select{width:100%}
+.compare-controls{display:flex;flex-wrap:wrap;align-items:end;gap:10px}.compare-controls .field{min-width:175px;flex:1}.compare-controls .field select{width:100%}
+.compare-table td,.compare-table th{text-align:right;white-space:nowrap}.compare-table td:first-child,.compare-table th:first-child{text-align:left}.delta-up{color:var(--green)}.delta-down{color:var(--red)}.delta-zero{color:var(--sub)}
+.comparison-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:14px}.comparebar{height:8px;min-width:90px;background:#263348;border-radius:4px;overflow:hidden;display:inline-block;vertical-align:middle;width:100px}.comparebar>i{display:block;height:100%;background:var(--accent)}.comparebar.b>i{background:var(--green)}.small-title{font-weight:600;margin:10px 0 4px}.snapshot-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--edge);background:var(--panel2);padding:5px 8px;border-radius:8px;font-size:12px}.snapshot-chip button{font-size:11px;padding:1px 5px}.snapshot-list{display:flex;flex-wrap:wrap;gap:7px}
+@media(max-width:950px){.comparison-grid{grid-template-columns:1fr}}
+.monthgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;margin:13px 0}.month{min-width:0}.month .bars{height:86px;background:#263348;border-radius:5px;display:flex;align-items:end;overflow:hidden}.month .bar{width:100%;background:linear-gradient(180deg,#93cfff,#367ab4);min-height:1px}.month .number{font-size:11px;text-align:center;color:var(--sub)}.month .num{font-size:11px;text-align:center;font-variant-numeric:tabular-nums;overflow:hidden}
+.details{display:grid;grid-template-columns:1fr 1fr;gap:12px}.details > div{min-width:0}.field{display:flex;flex-direction:column;gap:3px}.field input,.field select{width:100%}.formgrid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:9px;align-items:end}.footer{margin-top:22px;color:var(--sub);font-size:12px}a{color:var(--accent)}textarea{width:100%;min-height:180px;font-family:ui-monospace,Consolas,monospace;font-size:12px}.hidden{display:none!important}.tag{font-size:11px;display:inline-block;background:#2b4864;color:#d4e8ff;border-radius:5px;padding:2px 6px}.msg{color:var(--green);font-size:12px;margin-top:10px;white-space:pre-wrap}.error{color:var(--red)}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.details{grid-template-columns:1fr}.formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.rowname{min-width:240px}}
+@media(max-width:500px){main{padding:16px 10px 32px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stat b{font-size:19px}.monthgrid{gap:2px}.month .num{font-size:9px}.formgrid{grid-template-columns:1fr 1fr}}
+.reward-panel{margin-top:14px;background:#1a2839;border:1px solid var(--edge);border-radius:10px;padding:12px 14px}
+.reward-panel>summary,.reward-inline>summary,.detail-compare>summary{cursor:pointer;color:var(--accent)}
+.reward-panel>summary{font-weight:600}
+.reward-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin-top:12px}
+.reward-group{padding:10px;border:1px solid var(--edge);border-radius:9px;min-width:0}
+.reward-group h3{margin:0 0 7px;font-size:13px;color:var(--accent)}
+.reward-entry{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-top:1px solid #304056;font-size:12px}
+.reward-entry:first-of-type{border-top:none}.reward-entry b{white-space:nowrap;font-variant-numeric:tabular-nums}
+.reward-inline{max-width:285px;margin-top:3px;font-size:11px;white-space:normal}.reward-inline>summary{font-size:11px;line-height:1.5}.reward-inline .reward-group{margin-top:5px;padding:7px}
+.reward-inline .reward-entry{font-size:11px}.reward-primary{white-space:normal;max-width:275px;line-height:1.6}
+.detail-compare{margin-top:12px}.detail-compare summary{font-weight:600}
+@media(max-width:500px){.reward-groups{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<div class="header"><div><h1>艦これ 定期任務 資材計算器 <span class="pill" id="countBadge"></span></h1><p>実施する任務・達成率・選択報酬を設定して、ネジ・釘などの主要資材を月別・年間で集計します。資源・勲章・装備・各種アイテムは詳細欄にまとめて表示します。データと設定はこのブラウザ内に保存され、外部送信されません。</p></div><span class="tag">試作版 v4 / 2026-11</span></div>
+<section class="panel">
+ <div class="selectline"><label>計算対象年 <select id="year"></select></label><label>月間表示 <select id="monthMode"><option value="average">年平均（月あたり）</option><option value="actual">指定月</option></select></label><label id="monthPickerWrap" class="hidden">対象月 <select id="monthPicker"></select></label></div>
+ <p class="muted">デイリーは曜日を指定、ウィークリーは月あたりの週数を指定、クォータリーは各期の実施月、イヤーリーは実施月を任務ごとに指定します。週は月曜日始まり。「年平均（月）」は年間総数÷12です。</p>
+ <div class="grid" id="stats"></div>
+ <div class="toolbar" style="margin-top:12px"><label>月別グラフ資材 <select id="chartItem"></select></label><span class="muted" id="summary"></span></div>
+ <div class="monthgrid" id="monthChart"></div>
+ <details id="extraRewardsPanel" class="reward-panel"><summary>資源・勲章・装備・その他報酬の集計を見る <span id="extraRewardsCount" class="muted"></span></summary>
+ <p class="muted">選択した報酬を含む獲得見込みです。任務の達成に使う資材や装備の消費量、イベント・EO報酬は差し引いていません。0件の報酬は省略しています。</p>
+ <div id="extraStats"></div></details>
+</section>
+<section class="panel">
+ <h2>実施頻度の共通デフォルト</h2>
+ <div class="defaults">
+  <label class="field"><span class="label">デイリーの標準実施日数</span><select id="defaultDailyDays"></select></label>
+  <button id="applyDailyDefault" class="primary">全デイリー任務に反映</button>
+  <label class="field"><span class="label">クォータリーの標準実施月</span><select id="defaultQuarterOffset"></select></label>
+  <button id="applyQuarterDefault" class="primary">全クォータリー任務に反映</button>
+ </div>
+ <p class="muted">共通デフォルトは手動追加する任務の初期値に使用します。既存任務にも一括適用するにはそれぞれ「全…任務に反映」を押してください。任務ごとの曜日・実施月は引き続き個別に調整できます。</p>
+</section>
+<section class="panel" id="comparisonPanel">
+ <h2>条件の一時保存・比較</h2>
+ <div class="toolbar"><label>保存名 <input id="snapshotName" type="text" maxlength="40" placeholder="例：毎日任務を減らす案" style="min-width:230px"/></label><button id="captureSnapshot" class="primary">現在の条件を保存</button><span id="snapshotCount" class="muted"></span></div>
+ <p class="muted">最大8案までこのタブの一時領域に保持します。画面を再読み込みしても残りますが、別のタブとの共有や長期保存は想定していません。通常の任務設定は従来どおり保存されます。</p>
+ <div class="snapshot-list" id="snapshotList"></div>
+ <div class="compare-controls" style="margin-top:14px">
+  <label class="field"><span class="label">条件A（基準）</span><select id="compareA"></select></label>
+  <label class="field"><span class="label">条件B（比較先）</span><select id="compareB"></select></label>
+  <label class="field" style="max-width:140px"><span class="label">月別比較の資材</span><select id="compareItem"></select></label>
+  <button id="restoreSnapshot">選択した条件Aを編集に復元</button>
+ </div>
+ <p class="muted">差分は「B − A」です。計算対象年は画面上部の指定年に統一し、実施ON/OFF・選択報酬・各任務のスケジュールをそれぞれの条件で計算します。月間欄は画面上部の「月間表示」と連動します。</p>
+ <div id="comparisonResult"></div>
+</section>
+<section class="panel">
+ <div class="toolbar"><input id="search" type="text" placeholder="任務名・分類で検索" style="min-width:190px;flex:2"/><select id="periodFilter"><option value="">全周期</option><option value="D">デイリー</option><option value="W">ウィークリー</option><option value="M">マンスリー</option><option value="Q">クォータリー</option><option value="Y">イヤーリー</option></select><select id="onlyFilter"><option value="all">すべて表示</option><option value="active">実施する任務のみ</option><option value="optional">選択報酬あり</option></select><label class="pill"><input id="treeMode" type="checkbox" checked> ツリー順</label><button id="setAll">表示中をON</button><button id="clearAll">表示中をOFF</button></div>
+ <p class="muted">前提のある任務は、上流を実施ONにして初めてチェックできます。上流をOFFにすると後続もOFFになります。日・週・季・年の予定は任務ごとに指定できます。任務名は一部短縮しています。報酬は<strong>獲得量（グロス）</strong>で、改修や装備開発による支出は含まれません。</p>
+ <div class="tableWrap"><table><thead><tr><th>実施</th><th>任務 / 周期</th><th>実施スケジュール</th><th>確定報酬</th><th>選択報酬</th><th>年合計（設定値）</th></tr></thead><tbody id="questRows"></tbody></table></div>
+</section>
+<section class="panel">
+<h2>任務を手動追加</h2><p class="muted">Wikiで新しい任務を確認したら追加できます。選択報酬は「ネジ:2｜釘:6」のように入力（半角の | 区切り、複数資材は「ネジ:2,釘:3」）。</p>
+<form id="addForm"><div class="formgrid">
+<label class="field"><span class="label">任務名</span><input id="addName" type="text" required placeholder="任務名"/></label>
+<label class="field"><span class="label">周期</span><select id="addPeriod"><option value="D">デイリー</option><option value="W">ウィークリー</option><option value="M">マンスリー</option><option value="Q">クォータリー</option><option value="Y">イヤーリー</option></select></label>
+<label class="field"><span class="label">ネジ</span><input id="addScrew" type="number" value="0" step="1"/></label>
+<label class="field"><span class="label">釘</span><input id="addDev" type="number" value="0" step="1"/></label>
+<label class="field"><span class="label">バーナー</span><input id="addBurner" type="number" value="0" step="1"/></label>
+<label class="field"><span class="label">バケツ</span><input id="addBucket" type="number" value="0" step="1"/></label>
+</div><details class="reward-panel" style="margin-top:9px"><summary>追加報酬の登録（資源・装備・勲章など）</summary>
+ <p class="muted">固定報酬を「燃料:200, 勲章:1, 試製 23号電探改三:1」の形式で入力。装備名もそのまま集計できます。選択報酬も同じ形式で設定可能です。</p>
+ <label class="field"><span class="label">その他の固定報酬</span><input id="addExtraRewards" type="text" placeholder="燃料:200, 勲章:1"/></label>
+ </details>
+ <div class="toolbar" style="margin-top:9px"><label>選択報酬 <input id="addChoices" type="text" placeholder="ネジ:2 | 釘:6" style="min-width:260px"/></label><label>イヤーリー開始月 <select id="addMonth"></select></label><button type="submit" class="primary">任務を追加</button></div><div class="toolbar" style="margin-top:10px"><label>前提任務（複数選択可） <select id="addPrereqs" multiple size="4" style="display:block;min-width:320px;max-width:95%;margin-top:4px"></select></label><span class="muted">Ctrlキーなどで複数選択。登録済みの任務のみ指定できます。登録後の変更は各任務の「前提を編集」から。</span></div></form>
+</section>
+<section class="panel">
+<h2>データの保存・編集</h2>
+<div class="toolbar"><button id="export">任務・設定をJSONで書き出す</button><label class="pill" style="cursor:pointer">JSONを読み込む <input id="fileInput" type="file" accept=".json,application/json" style="display:none"/></label><button id="editJson">データをJSONで編集</button><button id="reset" class="warn">初期状態に戻す</button></div>
+<div id="jsonEditor" class="hidden"><p class="muted">任務ごとの <code>rewards</code> が確定報酬、<code>choiceGroups</code> が選択報酬です。編集後「反映」を押してください。ローカルの保存内容が置き換わります。</p><textarea id="jsonText"></textarea><div class="toolbar"><button id="applyJson" class="primary">編集内容を反映</button><button id="cancelJson">閉じる</button></div></div>
+<div id="notice" class="msg"></div>
+</section>
+<div class="footer"><p><strong>データの範囲と注意事項：</strong>初期登録は艦これWiki「資材」の主要な定期任務を中心にした暫定データです。全定期任務・全選択報酬は未網羅であり、ゲーム内の獲得数全体を示すものではありません。基本4資源は既存58任務の範囲で補完。装備・勲章などの特殊報酬は一部の確認済み任務から追加しました（全件網羅ではありません）。登録済み任務間の前提関係のみ制御します。未登録の単発前提・期間限定任務・日付限定任務・資材消費・勲章交換などは自動計算しません。</p><p>資料：<a href="https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90" target="_blank" rel="noopener">艦これWiki・資材</a> ／ <a href="https://wikiwiki.jp/kancolle/%E4%BB%BB%E5%8B%99/%E5%AE%9A%E6%9C%9F%E4%BB%BB%E5%8B%99%E7%B0%A1%E6%98%93%E3%81%BE%E3%81%A8%E3%82%81" target="_blank" rel="noopener">艦これWiki・定期任務</a> ／ <a href="https://zekamashi.net/kancolle-kouryaku/kousyousigen/" target="_blank" rel="noopener">ぜかましねっと・工廠資源</a></p></div>
+</main>
+<script>
+'use strict';
+const SEED=[{"id":"D-001","name":"敵艦隊を撃破せよ！","period":"D","rewards":{"釘":1,"燃料":50,"弾薬":50},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-002","name":"敵艦隊主力を撃滅せよ！","period":"D","rewards":{"釘":1,"バケツ":1,"燃料":50,"弾薬":50,"鋼材":50,"ボーキ":50},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["D-001"],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-003","name":"敵艦隊を10回邀撃せよ！","period":"D","rewards":{"釘":1,"燃料":150,"弾薬":150,"鋼材":200,"ボーキ":100},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["D-002"],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-004","name":"敵補給艦を3隻撃沈せよ！","period":"D","rewards":{"釘":1,"バケツ":1,"燃料":100,"弾薬":50,"鋼材":200,"ボーキ":50},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["D-002"],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-005","name":"南西諸島海域の制海権を握れ！","period":"D","rewards":{"バーナー":1,"バケツ":1,"燃料":300,"ボーキ":200},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["D-004"],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-006","name":"敵潜水艦を制圧せよ！","period":"D","rewards":{"バケツ":1,"燃料":300,"弾薬":30,"鋼材":300,"ボーキ":30},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["D-005"],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-007","name":"演習を3回実施せよ","period":"D","rewards":{"バーナー":1,"燃料":50,"鋼材":50},"active":false,"completion":100,"category":"演習","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-008","name":"演習で5回勝利せよ","period":"D","rewards":{"釘":1,"弾薬":50,"ボーキ":50},"active":false,"completion":100,"category":"演習","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-009","name":"遠征を3回成功させよう！","period":"D","rewards":{"釘":1,"燃料":100,"弾薬":100,"鋼材":100,"ボーキ":100},"active":false,"completion":100,"category":"遠征","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-010","name":"遠征を10回成功させよう！","period":"D","rewards":{"燃料":150,"弾薬":300,"鋼材":300,"ボーキ":150},"active":false,"completion":100,"category":"遠征","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-011","name":"艦娘を5回「入渠」させよ！","period":"D","rewards":{"バケツ":2,"燃料":30,"弾薬":30,"鋼材":30,"ボーキ":30},"active":false,"completion":100,"category":"補給/入渠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-012","name":"艦娘に15回「補給」せよ！","period":"D","rewards":{"釘":1,"バーナー":1,"燃料":50,"弾薬":50,"鋼材":50,"ボーキ":50},"active":false,"completion":100,"category":"補給/入渠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-013","name":"新装備「開発」指令","period":"D","rewards":{"釘":1,"バーナー":1,"燃料":40,"弾薬":40,"鋼材":40,"ボーキ":40},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-014","name":"新造艦「建造」指令","period":"D","rewards":{"釘":1,"バケツ":1,"燃料":50,"弾薬":50,"鋼材":50,"ボーキ":50},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-015","name":"装備「開発」集中強化！","period":"D","rewards":{"釘":2,"燃料":100,"弾薬":100,"鋼材":100,"ボーキ":100},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-016","name":"艦娘「建造」艦隊強化！","period":"D","rewards":{"釘":2,"バーナー":1,"燃料":200,"弾薬":200,"鋼材":300,"ボーキ":100},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-017","name":"艦娘「解体」任務","period":"D","rewards":{"バケツ":1,"ボーキ":50},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-018","name":"艦娘を「近代化改修」せよ！","period":"D","rewards":{"バケツ":1,"燃料":20,"弾薬":20,"鋼材":50},"active":false,"completion":100,"category":"改装","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-019","name":"装備の改修強化","period":"D","rewards":{"ネジ":1,"弾薬":50},"active":true,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","note":"改修に使うネジ・釘の支出は含まない","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-020","name":"続：装備の改修強化","period":"D","rewards":{"ネジ":1,"弾薬":40},"active":true,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","note":"2026年4月追加。前提デイリー達成後に開放","prerequisites":["D-019"],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-021","name":"装備開発力の整備","period":"D","rewards":{"釘":1,"鋼材":100},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"D-022","name":"工廠環境の整備","period":"D","rewards":{"釘":1,"バケツ":1,"弾薬":100},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"dailyWeekdays":[0,1,2,3,4,5,6],"rewardCatalogVersion":4},{"id":"W-023","name":"あ号作戦","period":"W","rewards":{"釘":2,"バーナー":2,"燃料":300,"弾薬":300,"鋼材":300,"ボーキ":100},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["D-002"],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-024","name":"い号作戦","period":"W","rewards":{"釘":2,"弾薬":500,"ボーキ":500},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["D-004"],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-025","name":"海上通商破壊作戦","period":"W","rewards":{"釘":3,"燃料":500,"鋼材":400},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["D-002"],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-026","name":"ろ号作戦","period":"W","rewards":{"バケツ":3,"燃料":400,"鋼材":800},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["W-023"],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-027","name":"海上護衛戦","period":"W","rewards":{"ネジ":1,"バケツ":2,"燃料":600},"active":true,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["W-024"],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-028","name":"敵北方艦隊主力を撃滅せよ！","period":"W","rewards":{"ネジ":3,"釘":3,"燃料":300,"弾薬":300,"鋼材":400,"ボーキ":300},"active":true,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-029","name":"敵東方艦隊を撃滅せよ！","period":"W","rewards":{"釘":2,"燃料":400,"ボーキ":700},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["W-027"],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-030","name":"敵東方中枢艦隊を撃破せよ！","period":"W","rewards":{"釘":1,"バケツ":1,"燃料":500,"鋼材":500},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["W-029"],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-031","name":"南方海域珊瑚諸島沖の制空権を握れ！","period":"W","rewards":{"ネジ":2,"釘":2,"弾薬":400,"ボーキ":800},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["W-030"],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-032","name":"海上輸送路の安全確保に努めよ！","period":"W","rewards":{"ネジ":3,"燃料":100},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["W-026"],"untrackedPrerequisites":["単発：改修工廠を準備せよ！"],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-033","name":"大規模演習（20勝）","period":"W","rewards":{"ネジ":1,"釘":2,"燃料":200,"弾薬":200,"鋼材":200,"ボーキ":200},"active":false,"completion":100,"category":"演習","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","note":"Wiki資材一覧の「演習勝利20回」に対応する短縮名","prerequisites":[],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-034","name":"大規模遠征作戦、発令！（30回）","period":"W","rewards":{"釘":3,"燃料":300,"弾薬":500,"鋼材":500,"ボーキ":300},"active":false,"completion":100,"category":"遠征","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-035","name":"南方への鼠輸送を継続実施せよ！","period":"W","rewards":{"ネジ":1,"釘":2,"燃料":400,"ボーキ":400},"active":false,"completion":100,"category":"遠征","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-036","name":"近代化改修を進め、戦備を整えよ！（15回）","period":"W","rewards":{"釘":2,"バーナー":1,"燃料":200,"弾薬":200,"鋼材":300,"ボーキ":100},"active":false,"completion":100,"category":"改装","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-037","name":"対空機銃量産","period":"W","rewards":{"ネジ":1,"釘":2,"弾薬":100,"ボーキ":200},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-038","name":"装備開発力の集中整備","period":"W","rewards":{"釘":7,"バケツ":1,"弾薬":200},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-039","name":"継戦支援能力の整備","period":"W","rewards":{"バケツ":5,"弾薬":500,"ボーキ":150},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"W-040","name":"装備の改修集中強化","period":"W","rewards":{"ネジ":3,"鋼材":50},"active":true,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","choiceGroups":[{"name":"選択報酬1","options":[{"label":"ネジ×2","rewards":{"ネジ":2}},{"label":"釘×6","rewards":{"釘":6}}]}],"note":"固定報酬のネジ3個に加え選択報酬1組。任務の前提条件に注意","prerequisites":["D-020","W-033"],"weeklyWeeksPerMonth":"all","weeklyPlacement":"first","rewardCatalogVersion":4},{"id":"M-041","name":"「第五戦隊」出撃せよ！","period":"M","rewards":{"釘":5,"弾薬":550,"鋼材":550},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"rewardCatalogVersion":4},{"id":"M-042","name":"「水雷戦隊」南西へ！","period":"M","rewards":{"ネジ":3,"燃料":500,"ボーキ":300},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["W-026"],"untrackedPrerequisites":["他の単発任務（詳細要確認）"],"rewardCatalogVersion":4},{"id":"M-043","name":"「水上打撃部隊」南方へ！","period":"M","rewards":{"ネジ":4,"バケツ":3,"燃料":350,"弾薬":400,"鋼材":350},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"rewardCatalogVersion":4},{"id":"M-044","name":"海上護衛強化月間","period":"M","rewards":{"ネジ":3,"釘":5,"燃料":800},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["M-041"],"untrackedPrerequisites":["単発：「第十八駆逐隊」出撃せよ！"],"rewardCatalogVersion":4},{"id":"M-045","name":"「空母機動部隊」西へ！","period":"M","rewards":{"ネジ":2,"鋼材":600,"ボーキ":800},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["W-026"],"untrackedPrerequisites":["単発：「第八駆逐隊」出撃せよ！"],"rewardCatalogVersion":4},{"id":"M-046","name":"「水上反撃部隊」突入せよ！","period":"M","rewards":{"ネジ":2,"釘":4,"弾薬":600,"ボーキ":200},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["M-045"],"untrackedPrerequisites":["単発：軽快な「水上反撃部隊」を編成せよ！"],"rewardCatalogVersion":4},{"id":"M-047","name":"精鋭艦隊演習","period":"M","rewards":{"バケツ":2,"弾薬":400,"ボーキ":200},"active":false,"completion":100,"category":"演習","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"rewardCatalogVersion":4},{"id":"Q-048","name":"沖ノ島海域迎撃戦","period":"Q","rewards":{"ネジ":5,"燃料":800,"弾薬":800,"鋼材":800,"給糧艦「間宮」":1},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["M-045"],"untrackedPrerequisites":["単発：「第六戦隊」出撃せよ！（要確認）"],"quarterOffset":0,"rewardDetailSource":"https://kannagi35.com/content/kantai-collection-quest-quarterly","rewardCatalogVersion":4},{"id":"Q-049","name":"「熟練搭乗員」養成","period":"Q","rewards":{"ネジ":4,"ボーキ":100,"熟練搭乗員":1},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"quarterOffset":0,"rewardDetailSource":"https://kannagi35.com/content/kantai-collection-quest-quarterly","note":"勲章×2と改修済み九六式艦戦などの消費は差し引いていません（獲得数のみ）。","rewardCatalogVersion":4},{"id":"Q-050","name":"主力「陸攻」の調達","period":"Q","rewards":{"釘":2,"燃料":250,"弾薬":250,"一式陸攻":1},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"quarterOffset":0,"rewardDetailSource":"https://kannagi35.com/content/kantai-collection-quest-quarterly","rewardCatalogVersion":4},{"id":"Q-051","name":"戦果拡張任務！「Z作戦」前段作戦","period":"Q","rewards":{"ネジ":4,"弾薬":2000,"戦果":350,"給糧艦「伊良湖」":1},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":["W-024"],"untrackedPrerequisites":["単発：潜水艦隊、中部海域の哨戒を実施せよ！"],"quarterOffset":0,"rewardDetailSource":"https://kannagi35.com/content/kantai-collection-quest-quarterly","rewardCatalogVersion":4},{"id":"Q-052","name":"強行輸送艦隊、抜錨！","period":"Q","rewards":{"バケツ":4,"燃料":1000,"弾薬":400,"鋼材":400,"洋上補給":1},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"quarterOffset":0,"rewardCatalogVersion":4,"rewardDetailSource":"https://kannagi35.com/content/kantai-collection-quest-quarterly"},{"id":"Q-053","name":"前線の航空偵察を実施せよ！","period":"Q","rewards":{"ネジ":4,"釘":8,"弾薬":800,"ボーキ":1000},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"quarterOffset":0,"rewardCatalogVersion":4},{"id":"Q-054","name":"海上通商航路の警戒を厳とせよ！","period":"Q","rewards":{"釘":4,"燃料":800,"戦闘糧食":2},"active":false,"completion":100,"category":"遠征","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"quarterOffset":0,"rewardDetailSource":"https://kannagi35.com/content/kantai-collection-quest-quarterly","rewardCatalogVersion":4},{"id":"Q-055","name":"敵潜を制圧せよ！","period":"Q","rewards":{"ネジ":3,"弾薬":1000,"ボーキ":300,"九五式爆雷":1},"active":false,"completion":100,"category":"出撃","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"quarterOffset":0,"rewardDetailSource":"https://kannagi35.com/content/kantai-collection-quest-quarterly","rewardCatalogVersion":4},{"id":"Q-056","name":"新型艤装の継続研究","period":"Q","rewards":{"釘":3,"弾薬":600},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"quarterOffset":0,"choiceGroups":[{"name":"選択報酬","selected":0,"options":[{"label":"勲章×1","rewards":{"勲章":1}},{"label":"新型砲熕兵装資材×1","rewards":{"新型砲熕兵装資材":1}}]}],"rewardDetailSource":"https://kannagi35.com/content/kantai-collection-quest-quarterly","rewardCatalogVersion":4},{"id":"Q-057","name":"運用装備の統合整備","period":"Q","rewards":{"ネジ":4,"燃料":200},"active":false,"completion":100,"category":"工廠","source":"https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90","prerequisites":[],"quarterOffset":0,"choiceGroups":[{"name":"選択報酬","selected":0,"options":[{"label":"一式戦 隼II型×1","rewards":{"一式戦 隼II型":1}},{"label":"紫電一一型×1","rewards":{"紫電一一型":1}},{"label":"ネジ×4","rewards":{"ネジ":4}}]}],"rewardDetailSource":"https://kannagi35.com/content/kantai-collection-quest-quarterly","rewardCatalogVersion":4},{"id":"Y-058","name":"「吹雪改三」抜錨します！見てくださいっ！","period":"Y","rewards":{"燃料":1945,"弾薬":1946},"active":false,"completion":100,"category":"出撃","source":"https://zekamashi.net/kancolle-kouryaku/kousyousigen/","startMonth":4,"choiceGroups":[{"name":"選択報酬1","options":[{"label":"工廠資源×5","rewards":{"工廠資源":5}},{"label":"海外艦最新技術×3","rewards":{"海外艦最新技術":3}},{"label":"釘×88","rewards":{"釘":88}}]},{"name":"選択報酬2","selected":0,"options":[{"label":"12.7cm単装高角砲改二 ★+6×1","rewards":{"12.7cm単装高角砲改二 ★+6":1}},{"label":"試製 23号電探改三×1","rewards":{"試製 23号電探改三":1}},{"label":"勲章×5","rewards":{"勲章":5}}]}],"note":"選択報酬が2組あります。期間内に1回。消費資材は差し引いていません。","prerequisites":[],"executionMonth":4,"rewardDetailSource":"https://zekamashi.net/kancolle-kouryaku/hubukikaisan-batubyou/","rewardCatalogVersion":4}];
+const KEY='kancolle-quest-estimator-2026v2';
+const SNAPSHOT_KEY='kancolle-quest-temporary-plans-v3';
+const OLD_KEY='kancolle-quest-estimator-2026v1';
+const BASE_ITEMS=['ネジ','釘','バーナー','バケツ'];
+const RESOURCE_ITEMS=['燃料','弾薬','鋼材','ボーキ'];
+const SPECIAL_KIND={
+ '勲章':'勲章・戦果・改装素材','戦果':'勲章・戦果・改装素材','工廠資源':'勲章・戦果・改装素材','海外艦最新技術':'勲章・戦果・改装素材',
+ '新型砲熕兵装資材':'勲章・戦果・改装素材','新型航空兵装資材':'勲章・戦果・改装素材','新型兵装資材':'勲章・戦果・改装素材','熟練搭乗員':'勲章・戦果・改装素材','戦闘詳報':'勲章・戦果・改装素材',
+ '給糧艦「間宮」':'アイテム・消耗品','給糧艦「伊良湖」':'アイテム・消耗品','戦闘糧食':'アイテム・消耗品','洋上補給':'アイテム・消耗品',
+ '一式陸攻':'装備','九五式爆雷':'装備','一式戦 隼II型':'装備','紫電一一型':'装備','12.7cm単装高角砲改二 ★+6':'装備','試製 23号電探改三':'装備'
+};
+function rewardKind(k){if(BASE_ITEMS.includes(k))return '主要資材';if(RESOURCE_ITEMS.includes(k))return '基本資源';return SPECIAL_KIND[k]||'その他の報酬'}
+const REWARD_GROUP_ORDER=['基本資源','勲章・戦果・改装素材','装備','アイテム・消耗品','その他の報酬'];
+function rewardEntries(rewards,mode='all'){return Object.entries(rewards||{}).filter(([k,v])=>v!==0&&(mode==='all'||(mode==='primary')===BASE_ITEMS.includes(k)));}
+function separated(rewards,mode){return Object.fromEntries(rewardEntries(rewards,mode))}
+function formatRewards(rewards){return Object.entries(rewards||{}).filter(([,v])=>v).map(([k,v])=>k+' ×'+fmt(v)).join(' / ')||'—'}
+function makeRewardGroups(parent,rewards,includePrimary=false){const kinds=new Map();for(const [k,v] of Object.entries(rewards||{})){if(!v)continue;const kind=rewardKind(k);if(!includePrimary&&kind==='主要資材')continue;if(!kinds.has(kind))kinds.set(kind,[]);kinds.get(kind).push([k,v]);}
+ if(!kinds.size){const n=document.createElement('p');n.className='muted';n.textContent='該当する報酬はありません';parent.append(n);return 0;}
+ const grid=document.createElement('div');grid.className='reward-groups';for(const [kind,rows] of [...kinds].sort(([a],[b])=>REWARD_GROUP_ORDER.indexOf(a)-REWARD_GROUP_ORDER.indexOf(b))){const section=document.createElement('section');section.className='reward-group';const h=document.createElement('h3');h.textContent=kind;section.append(h);for(const [k,v] of rows){const el=document.createElement('div');el.className='reward-entry';const name=document.createElement('span');name.textContent=k;const val=document.createElement('b');val.textContent=fmt(v);el.append(name,val);section.append(el)}grid.append(section)}parent.append(grid);return [...kinds.values()].reduce((n,rows)=>n+rows.length,0);
+}
+function makeExtraCell(rewards,context){const entries=rewardEntries(rewards,'extra');if(!entries.length)return null;const details=document.createElement('details');details.className='reward-inline';const sum=document.createElement('summary');sum.textContent=context+'（'+entries.length+'種類）';details.append(sum);const content=document.createElement('div');makeRewardGroups(content,rewards);details.append(content);return details;}
+
+const PERIOD_LABEL={D:'日',W:'週',M:'月',Q:'季',Y:'年'};
+const PER_RANK={D:0,W:1,M:2,Q:3,Y:4};
+const WEEK_LABEL=['日','月','火','水','木','金','土'];
+const PRESET_DAYS={0:[],1:[1],2:[1,4],3:[1,3,5],4:[1,2,4,5],5:[1,2,3,4,5],6:[1,2,3,4,5,6],7:[0,1,2,3,4,5,6]};
+const round=v=>Number(v.toFixed(2));
+const fmt=v=>Number(v).toLocaleString('ja-JP',{maximumFractionDigits:1});
+const $=id=>document.getElementById(id);
+const clone=v=>structuredClone(v);
+let data, state;
+let oldFormat=false;
+let saved=null;
+try{saved=JSON.parse(localStorage.getItem(KEY));}catch(e){}
+if(!saved){try{saved=JSON.parse(localStorage.getItem(OLD_KEY));oldFormat=!!saved;}catch(e){}}
+data=Array.isArray(saved?.data)?clone(saved.data):clone(SEED);
+const today=new Date();
+const defaultState={year:today.getFullYear(),monthMode:'average',month:today.getMonth()+1,chartItem:'ネジ',treeMode:true,dailyDefaultDays:7,quarterDefaultOffset:0};
+state={...defaultState,...(saved?.state||{})};
+if(![2024,2025,2026,2027,2028,2029,2030,2031,2032,2033,2034,2035].includes(Number(state.year)))state.year=today.getFullYear();
+if(!Number.isInteger(state.dailyDefaultDays)||state.dailyDefaultDays<0||state.dailyDefaultDays>7)state.dailyDefaultDays=7;
+if(![0,1,2].includes(state.quarterDefaultOffset))state.quarterDefaultOffset=0;
+let snapshots=[];
+try{const old=JSON.parse(sessionStorage.getItem(SNAPSHOT_KEY));if(Array.isArray(old))snapshots=old.filter(s=>s&&typeof s.id==='string'&&typeof s.label==='string'&&Array.isArray(s.data)&&s.state&&typeof s.state==='object').slice(0,8).filter(s=>{try{validate(s.data);return true}catch{return false}});}catch(e){}
+function storeSnapshots(){try{sessionStorage.setItem(SNAPSHOT_KEY,JSON.stringify(snapshots));}catch(e){showNotice('一時保存に失敗しました。保存領域の容量をご確認ください。',true)}}
+
+function backfillRewards(input){let changed=false;const templates=new Map(SEED.map(q=>[q.id,q]));for(const q of input){const tmpl=templates.get(q.id);if(!tmpl||q.rewardCatalogVersion>=4)continue;
+ q.rewards ||= {};
+ for(const [key,val] of Object.entries(tmpl.rewards||{}))if(!(key in q.rewards)){q.rewards[key]=val;changed=true;}
+ q.choiceGroups ||= [];
+ for(const group of tmpl.choiceGroups||[]){if(!q.choiceGroups.some(g=>g.name===group.name)){q.choiceGroups.push(clone(group));changed=true;}}
+ // Existing v3 name was '選択報酬'; new Y-058 group 1 is the same set of choices.
+ if(q.id==='Y-058'&&q.choiceGroups.length>=3){q.choiceGroups=q.choiceGroups.filter((g,i)=>i===0||g.name!=='選択報酬1');}
+ q.rewardCatalogVersion=4;changed=true;
+ if(tmpl.rewardDetailSource&&!q.rewardDetailSource)q.rewardDetailSource=tmpl.rewardDetailSource;
+ if(q.id==='Y-058'){q.choiceGroups[0].name='選択報酬1';q.note=tmpl.note;}
+ }return changed;}
+function migrate(){
+ const templates=new Map(SEED.map(q=>[q.id,q]));
+ for(const q of data){
+  const def=templates.get(q.id);
+  if(q.prerequisites===undefined)q.prerequisites=clone(def?.prerequisites||[]);
+  if(q.untrackedPrerequisites===undefined)q.untrackedPrerequisites=clone(def?.untrackedPrerequisites||[]);
+  if(q.period==='D'){
+   if(!Array.isArray(q.dailyWeekdays)){q.dailyWeekdays=clone(PRESET_DAYS[Number.isInteger(q.dailyDaysPerWeek)?Math.max(0,Math.min(7,q.dailyDaysPerWeek)):7]);}
+  }
+  if(q.period==='W'){
+   if(q.weeklyWeeksPerMonth===undefined)q.weeklyWeeksPerMonth='all';
+   if(!['first','last'].includes(q.weeklyPlacement))q.weeklyPlacement='first';
+  }
+  if(q.period==='Q'&&!Number.isInteger(q.quarterOffset))q.quarterOffset=oldFormat && state.quarter==='last'?2:0;
+  if(q.period==='Y'&&!Number.isInteger(q.executionMonth))q.executionMonth=Number(q.startMonth)||1;
+  if(q.completion===undefined)q.completion=100;
+ }
+}
+migrate();
+const migratedRewards=backfillRewards(data);
+for(const snap of snapshots)backfillRewards(snap.data);
+if(snapshots.length)storeSnapshots();
+function showNotice(msg,err=false){const el=$('notice');if(!el)return;el.textContent=msg;el.className=err?'msg error':'msg';}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({data,state}));}catch(e){showNotice('ブラウザ保存に失敗しました。JSON書き出しで退避してください。',true)}}
+function validate(input){
+ if(!Array.isArray(input))throw Error('JSONのトップレベルは任務配列にしてください。');
+ const index=new Map();
+ for(const q of input){
+  if(!q||typeof q!=='object'||typeof q.name!=='string'||typeof q.id!=='string'||!['D','W','M','Q','Y'].includes(q.period))throw Error('必須項目 id/name/period が不正です');
+  if(index.has(q.id))throw Error('IDが重複しています: '+q.id);
+  index.set(q.id,q);
+  if(!q.rewards||typeof q.rewards!=='object'||Array.isArray(q.rewards))throw Error(q.name+': rewardsが不正です');
+  for(const ob of [q.rewards,...(q.choiceGroups||[]).flatMap(g=>(g.options||[]).map(o=>o.rewards))]){
+   if(!ob||Array.isArray(ob)||typeof ob!=='object'||Object.entries(ob).some(([k,v])=>!k||typeof v!=='number'||!Number.isFinite(v)))throw Error(q.name+': 報酬の数値が不正です');
+  }
+  if(q.choiceGroups?.some(g=>!Array.isArray(g.options)||!g.options.length||g.options.some(o=>typeof o.label!=='string')))throw Error(q.name+': 選択報酬が不正です');
+  if(q.prerequisites!==undefined&&(!Array.isArray(q.prerequisites)||q.prerequisites.some(x=>typeof x!=='string')||new Set(q.prerequisites).size!==q.prerequisites.length))throw Error(q.name+': prerequisitesが不正です');
+  if(q.dailyWeekdays!==undefined&&(!Array.isArray(q.dailyWeekdays)||q.dailyWeekdays.some(x=>!Number.isInteger(x)||x<0||x>6)||new Set(q.dailyWeekdays).size!==q.dailyWeekdays.length))throw Error(q.name+': dailyWeekdaysは0（日）～6（土）の配列です');
+  if(q.weeklyWeeksPerMonth!==undefined&&q.weeklyWeeksPerMonth!=='all'&&(!Number.isInteger(q.weeklyWeeksPerMonth)||q.weeklyWeeksPerMonth<0||q.weeklyWeeksPerMonth>5))throw Error(q.name+': weeklyWeeksPerMonthが不正です');
+  if(q.weeklyPlacement!==undefined&&!['first','last'].includes(q.weeklyPlacement))throw Error(q.name+': weeklyPlacementが不正です');
+  if(q.quarterOffset!==undefined&&![0,1,2].includes(q.quarterOffset))throw Error(q.name+': quarterOffsetが不正です');
+  if(q.executionMonth!==undefined&&(!Number.isInteger(q.executionMonth)||q.executionMonth<1||q.executionMonth>12))throw Error(q.name+': executionMonthが不正です');
+ }
+ for(const q of input)for(const pid of q.prerequisites||[])if(!index.has(pid))throw Error(q.name+' の前提任務ID '+pid+' が見つかりません');
+ const seen=new Set(),visiting=new Set();
+ function visit(id){if(visiting.has(id))throw Error('任務の前提関係に循環があります: '+index.get(id).name);if(seen.has(id))return;visiting.add(id);for(const pid of index.get(id).prerequisites||[])visit(pid);visiting.delete(id);seen.add(id)}
+ for(const q of input)visit(q.id);
+ return input;
+}
+try{validate(data);}catch(e){showNotice('既存データの前提関係が不正です: '+e.message,true);data=clone(SEED);}
+function cascadeOff(){const index=new Map(data.map(q=>[q.id,q]));let changed=0,again=true;
+ while(again){again=false;for(const q of data){if(q.active&&(q.prerequisites||[]).some(id=>!index.get(id)?.active)){q.active=false;again=true;changed++;}}}
+ return changed;
+}
+const migratedDisabled=cascadeOff();
+if(oldFormat||migratedDisabled||migratedRewards)save();
+function isUnlocked(q,source=data){const m=new Map(source.map(x=>[x.id,x]));return (q.prerequisites||[]).every(id=>m.get(id)?.active);}
+function treeOrdered(){if(!state.treeMode)return data.map(q=>({q,depth:0}));
+ const index=new Map(data.map(q=>[q.id,q]));const visited=new Set();const out=[];
+ // Place roots in original order, descendants immediately beneath parents.
+ const children=new Map();for(const q of data)for(const pid of q.prerequisites||[]){if(!children.has(pid))children.set(pid,[]);children.get(pid).push(q.id)}
+ function walk(q,depth){if(visited.has(q.id))return;visited.add(q.id);out.push({q,depth:Math.min(depth,5)});for(const id of children.get(q.id)||[])if(index.has(id))walk(index.get(id),depth+1)}
+ for(const q of data)if(!(q.prerequisites||[]).length)walk(q,0);
+ for(const q of data)walk(q,0);return out;
+}
+function allItems(source=data){const s=new Set(BASE_ITEMS);for(const q of source){for(const k of Object.keys(q.rewards||{}))s.add(k);for(const g of q.choiceGroups||[])for(const o of g.options||[])for(const k of Object.keys(o.rewards||{}))s.add(k)}return [...s]}
+function rewardOf(q){const out={...q.rewards};for(const g of q.choiceGroups||[]){const o=g.options?.[Number(g.selected)||0];if(o)for(const [k,v] of Object.entries(o.rewards||{}))out[k]=(out[k]||0)+v}return out}
+function date(y,m,d=1){return new Date(y,m-1,d,12,0,0,0)}
+function ds(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')}
+function mondayOf(dt){const copy=date(dt.getFullYear(),dt.getMonth()+1,dt.getDate());copy.setDate(copy.getDate()-((copy.getDay()+6)%7));return ds(copy)}
+function quarterOf(dt){return Math.floor((dt.getFullYear()*12+dt.getMonth()-2)/3)}
+function cycleOf(dt,month){return dt.getFullYear()-(dt.getMonth()+1 < (Number(month)||1)?1:0)}
+function periodKey(dt,period,startMonth){if(period==='D')return ds(dt);if(period==='W')return mondayOf(dt);if(period==='M')return dt.getFullYear()*12+dt.getMonth();if(period==='Q')return quarterOf(dt);return cycleOf(dt,startMonth)}
+function sameCycle(a,b,child,parent){const p=PER_RANK[child.period]>=PER_RANK[parent.period]?child.period:parent.period;const annualStart=p==='Y'?(child.period==='Y'?child.startMonth:parent.startMonth):1;return periodKey(a,p,annualStart)===periodKey(b,p,annualStart)}
+function basicEvents(q,fromYear,toYear){const events=[];for(let y=fromYear;y<=toYear;y++)for(let m=1;m<=12;m++){
+ const last=new Date(y,m,0).getDate();
+ if(q.period==='D')for(let d=1;d<=last;d++){const dt=date(y,m,d);if((q.dailyWeekdays||PRESET_DAYS[7]).includes(dt.getDay()))events.push(dt)}
+ if(q.period==='W'){
+  const mondays=[];for(let d=1;d<=last;d++){const dt=date(y,m,d);if(dt.getDay()===1)mondays.push(dt)}
+  const count=q.weeklyWeeksPerMonth==='all'?mondays.length:Math.min(mondays.length,Number(q.weeklyWeeksPerMonth)||0);
+  events.push(...(q.weeklyPlacement==='last'?mondays.slice(-count||mondays.length).filter((_,i)=>count>0):mondays.slice(0,count)));
+ }
+ if(q.period==='M')events.push(date(y,m,Math.min(20,last)));
+ if(q.period==='Q'&&((m-3+12)%3)===(q.quarterOffset??0))events.push(date(y,m,Math.min(20,last)));
+ if(q.period==='Y'&&m===(q.executionMonth||q.startMonth||1))events.push(date(y,m,Math.min(20,last)));
+ }return events}
+// For each configured occurrence, require an upstream occurrence in the corresponding reset window.
+// This is a frequency/period approximation: it does not simulate in-game flag sequencing within a day.
+function buildSchedule(year,source=data){const index=new Map(source.map(q=>[q.id,q]));const cache=new Map(), visiting=new Set();
+ function scheduled(q){if(cache.has(q.id))return cache.get(q.id);if(visiting.has(q.id))return [];visiting.add(q.id);
+  let list=[];
+  if(q.active&&isUnlocked(q,source)){
+   const parents=(q.prerequisites||[]).map(id=>index.get(id));const upstream=parents.map(p=>p?scheduled(p):[]);
+   list=basicEvents(q,year-1,year+1).filter(d=>parents.every((p,i)=>p&&upstream[i].some(pd=>sameCycle(d,pd,q,p))));
+  }
+  visiting.delete(q.id);cache.set(q.id,list);return list;
+ }
+ for(const q of source)scheduled(q);
+ return cache;
+}
+function computeFor(source,settings){const year=Number(settings.year);const schedule=buildSchedule(year,source);const byMonth=Array.from({length:12},()=>Object.fromEntries(allItems(source).map(k=>[k,0])));
+ const rowCounts=new Map();let enabled=0;
+ for(const q of source){if(!q.active)continue;enabled++;
+  const dates=(schedule.get(q.id)||[]).filter(d=>d.getFullYear()===year);
+  const pct=Math.min(100,Math.max(0,Number(q.completion??100)))/100;
+  rowCounts.set(q.id,dates.length*pct);
+  const reward=rewardOf(q);
+  for(const d of dates){const entry=byMonth[d.getMonth()];for(const [k,v] of Object.entries(reward))entry[k]=(entry[k]||0)+v*pct;}
+ }
+ const annual=Object.fromEntries(allItems(source).map(k=>[k,0]));for(const monthly of byMonth)for(const [k,v] of Object.entries(monthly))annual[k]=(annual[k]||0)+v;
+ return{annual,byMonth,rowCounts,enabled};
+}
+function compute(){return computeFor(data,state);}
+function textOfRewards(rewards){return Object.entries(rewards||{}).filter(([,v])=>v).map(([k,v])=>k+' '+(v>0?'+':'')+fmt(v)).join(' / ')||'—'}
+function matching(q){const term=$('search').value.trim().toLowerCase();if(term&&!(q.name+' '+(q.category||'')+' '+q.id).toLowerCase().includes(term))return false;
+ if($('periodFilter').value&&q.period!==$('periodFilter').value)return false;
+ if($('onlyFilter').value==='active'&&!q.active)return false;
+ if($('onlyFilter').value==='optional'&&!(q.choiceGroups||[]).length)return false;return true}
+function createSelect(options,current,callback){const sel=document.createElement('select');for(const [val,caption] of options)sel.append(new Option(caption,String(val)));sel.value=String(current);sel.addEventListener('change',()=>callback(sel.value));return sel}
+function labelWrap(label,child){const wrap=document.createElement('label');wrap.className='field';const head=document.createElement('span');head.className='tasklabel';head.textContent=label;wrap.append(head,child);return wrap}
+function scheduleControl(q){const wrap=document.createElement('div');wrap.className='schedule';
+ if(q.period==='D'){
+  const weekdays=q.dailyWeekdays||PRESET_DAYS[7];
+  const count=createSelect(Array.from({length:8},(_,n)=>[n,'週'+n+'日']),weekdays.length,value=>{q.dailyWeekdays=clone(PRESET_DAYS[Number(value)]);save();renderAll()});
+  wrap.append(count);
+  const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent='曜日を個別指定';summary.className='tasklabel';details.append(summary);
+  const days=document.createElement('div');days.className='weekdayrow';for(const i of [1,2,3,4,5,6,0]){
+   const label=document.createElement('label');label.className='weekday';const cb=document.createElement('input');cb.type='checkbox';cb.checked=weekdays.includes(i);
+   cb.addEventListener('change',()=>{const s=new Set(q.dailyWeekdays||PRESET_DAYS[7]);if(cb.checked)s.add(i);else s.delete(i);q.dailyWeekdays=[...s].sort((a,b)=>a-b);save();renderAll()});label.append(cb,document.createTextNode(WEEK_LABEL[i]));days.append(label);
+  }details.append(days);wrap.append(details);
+ }
+ if(q.period==='W'){
+  const options=[['all','毎週（4～5週）'],...[1,2,3,4,5].map(n=>[n,'月'+n+'週']),[0,'実施なし']];
+  wrap.append(createSelect(options,q.weeklyWeeksPerMonth??'all',value=>{q.weeklyWeeksPerMonth=value==='all'?'all':Number(value);save();renderAll()}));
+  if(q.weeklyWeeksPerMonth!=='all'&&Number(q.weeklyWeeksPerMonth)>0){wrap.append(createSelect([['first','月初側の週から'],['last','月末側の週から']],q.weeklyPlacement||'first',v=>{q.weeklyPlacement=v;save();renderAll()}));}
+ }
+ if(q.period==='Q'){
+  const labels=['各期の1か月目 (3/6/9/12月)','各期の2か月目 (4/7/10/1月)','各期の3か月目 (5/8/11/2月)'];
+  wrap.append(createSelect(labels.map((s,i)=>[i,s]),q.quarterOffset??0,v=>{q.quarterOffset=Number(v);save();renderAll()}));
+ }
+ if(q.period==='Y'){
+  const start=Number(q.startMonth)||1;
+  const opts=Array.from({length:12},(_,i)=>{const month=((start+i-1)%12)+1;return[month,month+'月'+(i===0?'（開始月）':month<start?'（翌年）':'')]});
+  wrap.append(createSelect(opts,q.executionMonth||start,v=>{q.executionMonth=Number(v);save();renderAll()}));
+ }
+ if(q.period==='M'){const span=document.createElement('span');span.className='tasklabel';span.textContent='毎月1回';wrap.append(span)}
+ const rate=document.createElement('label');rate.className='tasklabel';rate.textContent='達成率 ';const rateInput=document.createElement('input');rateInput.type='number';rateInput.min=0;rateInput.max=100;rateInput.step=10;rateInput.style.width='57px';rateInput.value=q.completion??100;
+ rateInput.addEventListener('change',()=>{q.completion=Math.min(100,Math.max(0,Number(rateInput.value)||0));save();renderAll()});rate.append(rateInput,document.createTextNode('%'));wrap.append(rate);
+ return wrap;
+}
+function updateParent(q,parentId,add){const prev=clone(q.prerequisites||[]);
+ if(add)q.prerequisites=[...new Set([...prev,parentId])];else q.prerequisites=prev.filter(x=>x!==parentId);
+ try{validate(data);const removed=cascadeOff();save();renderAll();if(removed)showNotice('前提条件変更に伴い、実施できなくなった後続任務を'+removed+'件OFFにしました。');}
+ catch(e){q.prerequisites=prev;showNotice('前提の更新を取り消しました: '+e.message,true);renderAll();}
+}
+function prerequisiteEditor(q){const details=document.createElement('details');details.className='prereq-box';const summary=document.createElement('summary');
+ summary.textContent='前提を編集'+((q.prerequisites||[]).length?'（'+q.prerequisites.length+'件）':'');details.append(summary);
+ const parents=document.createElement('div');for(const id of q.prerequisites||[]){const p=data.find(x=>x.id===id);const chip=document.createElement('span');chip.className='parent-chip';chip.append(document.createTextNode(p?.name||id));const rem=document.createElement('button');rem.type='button';rem.textContent='×';rem.title='この前提を外す';rem.addEventListener('click',()=>updateParent(q,id,false));chip.append(rem);parents.append(chip)}details.append(parents);
+ const candidates=data.filter(x=>x.id!==q.id&&!(q.prerequisites||[]).includes(x.id));
+ const sel=createSelect([['','前提を追加…'],...candidates.map(p=>[p.id,PERIOD_LABEL[p.period]+' '+p.name])],'',v=>{if(v)updateParent(q,v,true)});
+ details.append(sel);return details;
+}
+function renderStats(computed){const items=allItems();$('countBadge').textContent=data.length+'任務を登録';$('summary').textContent='実施 '+computed.enabled+' / '+data.length+'任務（選択した予定に基づく獲得見込み）';$('stats').replaceChildren();
+ for(const k of BASE_ITEMS){const val=state.monthMode==='average'?(computed.annual[k]||0)/12:(computed.byMonth[(state.month||1)-1][k]||0);
+ const el=document.createElement('div');el.className='stat';const label=document.createElement('div');label.className='label';label.textContent=k;
+ const big=document.createElement('b');big.textContent=fmt(val);const sub=document.createElement('div');sub.className='span';sub.textContent=state.monthMode==='average'?'月平均':state.month+'月の獲得見込み';const yr=document.createElement('div');yr.className='year';yr.textContent='年間 '+fmt(computed.annual[k]||0);el.append(label,big,sub,yr);$('stats').append(el)}
+ if($('chartItem').options.length!==items.length||items.some(k=>![...$('chartItem').options].some(o=>o.value===k)))$('chartItem').replaceChildren(...items.map(k=>new Option(k,k)));
+ $('chartItem').value=items.includes(state.chartItem)?state.chartItem:'ネジ';const key=$('chartItem').value;
+ const extra=Object.fromEntries(items.filter(k=>!BASE_ITEMS.includes(k)).map(k=>[k,state.monthMode==='average'?(computed.annual[k]||0)/12:(computed.byMonth[(state.month||1)-1][k]||0)]));
+ const parent=$('extraStats');parent.replaceChildren();const current=document.createElement('div');makeRewardGroups(current,extra);parent.append(current);
+ const yr=document.createElement('details');yr.className='detail-compare';const head=document.createElement('summary');head.textContent='年間の獲得量も表示';yr.append(head);const annual=document.createElement('div');makeRewardGroups(annual,Object.fromEntries(items.filter(k=>!BASE_ITEMS.includes(k)).map(k=>[k,computed.annual[k]||0])));yr.append(annual);parent.append(yr);
+ $('extraRewardsCount').textContent='（'+items.filter(k=>!BASE_ITEMS.includes(k)&&(computed.annual[k]||0)!==0).length+'種類）';
+ const vs=computed.byMonth.map(o=>o[key]||0);const mx=Math.max(1,...vs);
+
+ $('monthChart').replaceChildren(...vs.map((v,i)=>{const box=document.createElement('div');box.className='month';const num=document.createElement('div');num.className='num';num.textContent=fmt(v);num.title=fmt(v);const bars=document.createElement('div');bars.className='bars';const bar=document.createElement('div');bar.className='bar';bar.style.height=(100*v/mx)+'%';bars.append(bar);const month=document.createElement('div');month.className='number';month.textContent=i+1+'月';box.append(num,bars,month);return box}));
+}
+function renderRows(computed){const tbody=$('questRows');tbody.replaceChildren();const index=new Map(data.map(q=>[q.id,q]));
+ for(const {q,depth} of treeOrdered().filter(({q})=>matching(q))){const unlocked=isUnlocked(q);const tr=document.createElement('tr');if(!q.active)tr.classList.add('inactive');if(!unlocked)tr.classList.add('blocked');
+ const chkCell=document.createElement('td');const chk=document.createElement('input');chk.type='checkbox';chk.checked=!!q.active;chk.disabled=!unlocked;chk.title=!unlocked?'先に前提任務をONにしてください':'この任務を実施する';chk.addEventListener('change',()=>{
+  q.active=chk.checked;const count=chk.checked?0:cascadeOff();save();renderAll();if(count)showNotice('上流任務をOFFにしたため、後続の'+count+'件もOFFにしました。');});chkCell.append(chk);
+ const nameCell=document.createElement('td');nameCell.className='rowname';const inner=document.createElement('div');inner.style.paddingLeft=(depth*13)+'px';
+ const name=document.createElement('strong');name.textContent=(depth?'↳ ':'')+q.name;inner.append(name);
+ const meta=document.createElement('span');meta.className='tasklabel';meta.textContent=PERIOD_LABEL[q.period]+'・'+(q.category||'その他')+(q.period==='Y'?'・'+(q.startMonth||1)+'月開始':'');inner.append(meta);
+ const missing=(q.prerequisites||[]).map(id=>index.get(id)).filter(p=>!p?.active).map(p=>p?.name||'不明');if(missing.length){const hint=document.createElement('span');hint.className='blocked-note';hint.textContent='先にON：'+missing.join('、');inner.append(hint)}
+ if((q.prerequisites||[]).length){const hint=document.createElement('span');hint.className='tasklabel';hint.textContent='前提：'+q.prerequisites.map(id=>index.get(id)?.name||id).join('、');inner.append(hint)}
+ if(q.untrackedPrerequisites?.length){const hint=document.createElement('span');hint.className='blocked-note';hint.textContent='未管理の前提：'+q.untrackedPrerequisites.join(' / ');inner.append(hint)}
+ if(q.note){const hint=document.createElement('span');hint.className='tasklabel';hint.textContent=q.note;inner.append(hint)}
+ inner.append(prerequisiteEditor(q));nameCell.append(inner);
+ const sched=document.createElement('td');sched.append(scheduleControl(q));
+ const fixed=document.createElement('td');fixed.className='rewardtext';const fixedPri=document.createElement('div');fixedPri.className='reward-primary';fixedPri.textContent=textOfRewards(separated(q.rewards,'primary'));fixed.append(fixedPri);const moreFixed=makeExtraCell(q.rewards,'基本資源・その他');if(moreFixed)fixed.append(moreFixed);
+ const choices=document.createElement('td');choices.className='choicecol';const stack=document.createElement('div');stack.className='choiceStack';for(const g of q.choiceGroups||[]){const label=document.createElement('span');label.className='tasklabel';label.textContent=g.name||'選択報酬';const sel=createSelect(g.options.map((o,i)=>[i,o.label]),g.selected||0,v=>{g.selected=Number(v);save();renderAll()});stack.append(label,sel)}choices.append(stack);if(!stack.children.length)choices.textContent='—';
+ const ann=document.createElement('td');ann.className='resultcol rewardtext';const count=computed.rowCounts.get(q.id)||0;
+ if(q.active){const gain=Object.fromEntries(Object.entries(rewardOf(q)).map(([k,v])=>[k,round(v*count)]));const annualPrimary=document.createElement('div');annualPrimary.className='reward-primary';annualPrimary.textContent=textOfRewards(separated(gain,'primary'));ann.append(annualPrimary);const extra=makeExtraCell(gain,'基本資源・その他');if(extra)ann.append(extra);}else ann.textContent='—';
+ tr.append(chkCell,nameCell,sched,fixed,choices,ann);tbody.append(tr);
+ }
+ if(!tbody.children.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=6;td.textContent='条件に一致する任務がありません';tr.append(td);tbody.append(tr)}
+}
+function renderAll(){const computed=compute();renderStats(computed);renderRows(computed);renderComparison()}
+function updateAddPrereqs(){const sel=$('addPrereqs');if(!sel)return;sel.replaceChildren(...data.map(q=>new Option(PERIOD_LABEL[q.period]+' '+q.name,q.id)))}
+// Scenarios are private copies; computing them never mutates the edited plan.
+function comparisonPlan(id){if(id==='current')return{label:'現在の設定',data,state};return snapshots.find(s=>s.id===id)||null}
+function fillComparisonControls(preferLatest=false){
+ const opts=[['current','現在の設定'],...snapshots.map(s=>[s.id,s.label])];
+ for(const key of ['compareA','compareB']){
+  const sel=$(key),previous=sel.value;
+  sel.replaceChildren(...opts.map(([id,label])=>new Option(label,id)));
+  if(previous&&opts.some(([id])=>id===previous))sel.value=previous;
+  else if(key==='compareA'&&snapshots.length)sel.value=snapshots[0].id;
+  else sel.value='current';
+ }
+ if(preferLatest&&snapshots.length){$('compareA').value=snapshots[snapshots.length-1].id;$('compareB').value='current'}
+ $('snapshotCount').textContent=snapshots.length+' / 8案を一時保持';
+ const list=$('snapshotList');list.replaceChildren();
+ if(!snapshots.length){const t=document.createElement('span');t.className='muted';t.textContent='保存済みの条件はありません。まず条件Aを保存してください。';list.append(t)}
+ for(const s of snapshots){const chip=document.createElement('span');chip.className='snapshot-chip';const name=document.createElement('span');name.textContent=s.label;name.title='保存時 '+(s.savedAt||'');const del=document.createElement('button');del.textContent='削除';del.title=s.label+'を削除';del.addEventListener('click',()=>{snapshots=snapshots.filter(x=>x.id!==s.id);storeSnapshots();fillComparisonControls();renderComparison()});chip.append(name,del);list.append(chip)}
+}
+function deltaLabel(value){const num=round(value);return (num>0?'+':'')+fmt(num)}
+function changeClass(value){return value>0?'delta-up':value<0?'delta-down':'delta-zero'}
+function compareMonthTotal(result,key){return state.monthMode==='average'?(result.annual[key]||0)/12:result.byMonth[Number(state.month)-1]?.[key]||0}
+function createComparisonTable(headers,rows,classes=''){const wrap=document.createElement('div');wrap.className='tableWrap';wrap.style.maxHeight='390px';const table=document.createElement('table');table.className='compare-table '+classes;const thead=document.createElement('thead'),head=document.createElement('tr');for(const h of headers){const th=document.createElement('th');th.textContent=h;head.append(th)}thead.append(head);table.append(thead);const tbody=document.createElement('tbody');for(const row of rows){const tr=document.createElement('tr');for(let i=0;i<row.length;i++){const td=document.createElement('td');const value=row[i];if(typeof value==='object'&&value!==null&&value.delta!==undefined){td.textContent=deltaLabel(value.delta);td.className=changeClass(round(value.delta))}else td.textContent=String(value);tr.append(td)}tbody.append(tr)}table.append(tbody);wrap.append(table);return wrap}
+function planChanges(a,b){const aMap=new Map(a.data.map(q=>[q.id,q])),bMap=new Map(b.data.map(q=>[q.id,q]));const changed=[];
+ for(const id of new Set([...aMap.keys(),...bMap.keys()])){
+  const qa=aMap.get(id),qb=bMap.get(id);
+  if(!qa){changed.push('追加：'+qb.name);continue}
+  if(!qb){changed.push('削除：'+qa.name);continue}
+  const fmtPlan=q=>JSON.stringify({active:!!q.active,completion:q.completion??100,days:q.dailyWeekdays,weeks:q.weeklyWeeksPerMonth,placement:q.weeklyPlacement,quarter:q.quarterOffset,yearMonth:q.executionMonth,choice:(q.choiceGroups||[]).map(g=>g.selected||0),parents:q.prerequisites,rewards:q.rewards});
+  if(fmtPlan(qa)===fmtPlan(qb))continue;
+  const notes=[];
+  if(!!qa.active!==!!qb.active)notes.push((qa.active?'ON':'OFF')+' → '+(qb.active?'ON':'OFF'));
+  if(JSON.stringify(qa.dailyWeekdays)!==JSON.stringify(qb.dailyWeekdays))notes.push('週'+(qa.dailyWeekdays||[]).length+'日→週'+(qb.dailyWeekdays||[]).length+'日');
+  if(qa.weeklyWeeksPerMonth!==qb.weeklyWeeksPerMonth||qa.weeklyPlacement!==qb.weeklyPlacement)notes.push('週の実施回数・位置変更');
+  if(qa.quarterOffset!==qb.quarterOffset)notes.push('クォータリーの実施月変更');
+  if(qa.executionMonth!==qb.executionMonth)notes.push('イヤーリーの実施月変更');
+  if(JSON.stringify((qa.choiceGroups||[]).map(g=>g.selected||0))!==JSON.stringify((qb.choiceGroups||[]).map(g=>g.selected||0)))notes.push('選択報酬変更');
+  if(qa.completion!==qb.completion)notes.push('達成率変更');
+  changed.push(qa.name+'：'+(notes.join('、')||'任務データ変更'));
+ }
+ return changed;
+}
+function renderComparison(){
+ const pane=$('comparisonResult');if(!pane)return;pane.replaceChildren();
+ if(!snapshots.length){const t=document.createElement('p');t.className='muted';t.textContent='条件Aを保存すると、現在の設定や別の保存済み条件と比較できます。';pane.append(t);return}
+ const a=comparisonPlan($('compareA').value),b=comparisonPlan($('compareB').value);if(!a||!b)return;
+ if($('compareA').value===$('compareB').value){const p=document.createElement('p');p.className='muted';p.textContent='異なる条件を2つ選んでください。';pane.append(p);return}
+ const sharedYear=Number(state.year),aCalc=computeFor(a.data,{...a.state,year:sharedYear}),bCalc=computeFor(b.data,{...b.state,year:sharedYear});
+ const items=[...new Set([...allItems(a.data),...allItems(b.data)])];
+ const itemSel=$('compareItem'),picked=itemSel.value;itemSel.replaceChildren(...items.map(k=>new Option(k,k)));itemSel.value=items.includes(picked)?picked:'ネジ';
+ const unit=state.monthMode==='average'?'月平均':state.month+'月';
+ const summary=document.createElement('p');summary.className='small-title';summary.textContent='獲得見込みの比較（'+sharedYear+'年）';pane.append(summary);
+ const rows=items.map(k=>[k,fmt(aCalc.annual[k]||0),fmt(bCalc.annual[k]||0),{delta:(bCalc.annual[k]||0)-(aCalc.annual[k]||0)},fmt(compareMonthTotal(aCalc,k)),fmt(compareMonthTotal(bCalc,k)),{delta:compareMonthTotal(bCalc,k)-compareMonthTotal(aCalc,k)}]);
+ const primaryRows=rows.filter((row,i)=>BASE_ITEMS.includes(items[i]));
+ pane.append(createComparisonTable(['資材','A・年間','B・年間','年間差','A・'+unit,'B・'+unit,unit+'差'],primaryRows));
+ const extraRows=rows.filter((row,i)=>!BASE_ITEMS.includes(items[i])&&((aCalc.annual[items[i]]||0)!==0||(bCalc.annual[items[i]]||0)!==0));
+ const more=document.createElement('details');more.className='detail-compare';const summaryExtra=document.createElement('summary');summaryExtra.textContent='資源・勲章・装備などの比較（'+extraRows.length+'種類）';more.append(summaryExtra);
+ if(extraRows.length)more.append(createComparisonTable(['報酬','A・年間','B・年間','年間差','A・'+unit,'B・'+unit,unit+'差'],extraRows));else{const msg=document.createElement('p');msg.className='muted';msg.textContent='追加報酬はありません';more.append(msg)}pane.append(more);
+ const grid=document.createElement('div');grid.className='comparison-grid';grid.style.marginTop='14px';
+ const left=document.createElement('div');const ltitle=document.createElement('div');ltitle.className='small-title';ltitle.textContent='月別比較：'+itemSel.value;left.append(ltitle);
+ const k=itemSel.value;const monthlyRows=Array.from({length:12},(_,i)=>[i+1+'月',fmt(aCalc.byMonth[i][k]||0),fmt(bCalc.byMonth[i][k]||0),{delta:(bCalc.byMonth[i][k]||0)-(aCalc.byMonth[i][k]||0)}]);left.append(createComparisonTable(['月','A','B','B−A'],monthlyRows));grid.append(left);
+ const right=document.createElement('div');const rtitle=document.createElement('div');rtitle.className='small-title';const changes=planChanges(a,b);rtitle.textContent='設定の違い（'+changes.length+'任務）';right.append(rtitle);
+ const details=document.createElement('details');details.open=changes.length<=8;const summaryElem=document.createElement('summary');summaryElem.textContent=changes.length?'変更した任務を見る':'任務設定に差はありません';summaryElem.style.cursor='pointer';details.append(summaryElem);
+ const list=document.createElement('ul');list.style.paddingLeft='21px';for(const line of changes){const li=document.createElement('li');li.textContent=line;list.append(li)}details.append(list);right.append(details);
+ const note=document.createElement('p');note.className='muted';note.textContent='実施設定の変更により、前提任務が満たされる回数も再計算しています。';right.append(note);grid.append(right);pane.append(grid);
+}
+function setupComparison(){
+ $('captureSnapshot').addEventListener('click',()=>{
+  if(snapshots.length>=8){showNotice('一時保存は最大8件です。不要な条件を削除してから保存してください。',true);return}
+  const label=$('snapshotName').value.trim()||'条件 '+(snapshots.length+1);
+  snapshots.push({id:'plan-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),label,data:clone(data),state:clone(state),savedAt:new Date().toLocaleString('ja-JP')});
+  storeSnapshots();$('snapshotName').value='';fillComparisonControls(true);renderComparison();showNotice('「'+label+'」を一時保存しました。設定を変更すると、保存条件と現在の条件を比較できます。');
+ });
+ $('compareA').addEventListener('change',renderComparison);$('compareB').addEventListener('change',renderComparison);$('compareItem').addEventListener('change',renderComparison);
+ $('restoreSnapshot').addEventListener('click',()=>{
+  const id=$('compareA').value;if(id==='current'){showNotice('現在の設定はすでに編集中です。保存済みの条件Aを選んでください。',true);return}
+  const s=comparisonPlan(id);if(!s)return;
+  if(!confirm('「'+s.label+'」を編集中の設定に復元しますか？ 現在の未保存の変更は上書きされます。'))return;
+  data=clone(s.data);state={...defaultState,...clone(s.state),year:Number($('year').value)};
+  migrate();backfillRewards(data);cascadeOff();save();location.reload();
+ });
+ fillComparisonControls();
+}
+
+function setupControls(){
+ const quarterLabels=['各期の1か月目（3/6/9/12月）','各期の2か月目（4/7/10/1月）','各期の3か月目（5/8/11/2月）'];
+ for(let i=0;i<=7;i++)$('defaultDailyDays').append(new Option('週'+i+'日',i));
+ quarterLabels.forEach((str,i)=>$('defaultQuarterOffset').append(new Option(str,i)));
+ $('defaultDailyDays').value=state.dailyDefaultDays;
+ $('defaultQuarterOffset').value=state.quarterDefaultOffset;
+ $('defaultDailyDays').addEventListener('change',()=>{state.dailyDefaultDays=Number($('defaultDailyDays').value);save()});
+ $('defaultQuarterOffset').addEventListener('change',()=>{state.quarterDefaultOffset=Number($('defaultQuarterOffset').value);save()});
+ $('applyDailyDefault').addEventListener('click',()=>{
+  const days=clone(PRESET_DAYS[state.dailyDefaultDays]);let count=0;
+  for(const q of data)if(q.period==='D'){q.dailyWeekdays=clone(days);count++}
+  save();renderAll();showNotice('デイリー'+count+'件に「週'+state.dailyDefaultDays+'日」を反映しました。個別設定は後から調整できます。');
+ });
+ $('applyQuarterDefault').addEventListener('click',()=>{
+  let count=0;for(const q of data)if(q.period==='Q'){q.quarterOffset=state.quarterDefaultOffset;count++}
+  save();renderAll();showNotice('クォータリー'+count+'件に「各期の'+(state.quarterDefaultOffset+1)+'か月目」を反映しました。');
+ });
+ for(let y=2024;y<=2035;y++)$('year').append(new Option(y+'年',y));if(![...$('year').options].some(o=>Number(o.value)===Number(state.year)))$('year').append(new Option(state.year+'年',state.year));
+ for(let i=1;i<=12;i++){$('monthPicker').append(new Option(i+'月',i));$('addMonth').append(new Option(i+'月',i))}
+ $('year').value=state.year;$('monthMode').value=state.monthMode;$('monthPicker').value=state.month;$('treeMode').checked=!!state.treeMode;
+ $('monthPickerWrap').classList.toggle('hidden',state.monthMode!=='actual');
+ $('year').addEventListener('change',()=>{state.year=Number($('year').value);save();renderAll()});
+ $('monthMode').addEventListener('change',()=>{state.monthMode=$('monthMode').value;$('monthPickerWrap').classList.toggle('hidden',state.monthMode!=='actual');save();renderStats(compute());renderComparison()});
+ $('monthPicker').addEventListener('change',()=>{state.month=Number($('monthPicker').value);save();renderStats(compute());renderComparison()});
+ $('chartItem').addEventListener('change',()=>{state.chartItem=$('chartItem').value;save();renderStats(compute())});
+ $('treeMode').addEventListener('change',()=>{state.treeMode=$('treeMode').checked;save();renderRows(compute())});
+ $('search').addEventListener('input',()=>renderRows(compute()));$('periodFilter').addEventListener('change',()=>renderRows(compute()));$('onlyFilter').addEventListener('change',()=>renderRows(compute()));
+ $('setAll').addEventListener('click',()=>{const visible=data.filter(matching);const ids=new Set(visible.map(q=>q.id));let remaining=[...visible];let progress=true;
+  while(progress){progress=false;remaining=remaining.filter(q=>{if(isUnlocked(q)){q.active=true;progress=true;return false}return true})}
+  const prevented=remaining.length;save();renderAll();showNotice(prevented?'前提がOFFのため'+prevented+'件は選択できませんでした。上流任務を確認してください。':'表示中の任務をONにしました。');});
+ $('clearAll').addEventListener('click',()=>{data.filter(matching).forEach(q=>q.active=false);const affected=cascadeOff();save();renderAll();showNotice('表示中の任務をOFFにしました。後続'+affected+'件もOFFにしました。')});
+ $('reset').addEventListener('click',()=>{if(confirm('任務・スケジュール・選択報酬の設定を初期化します。よろしいですか？')){data=clone(SEED);state={...defaultState};cascadeOff();save();location.reload()}});
+ $('export').addEventListener('click',()=>{const payload=JSON.stringify({format:'kancolle-quest-estimator-4',savedAt:new Date().toISOString(),data,state},null,2);const b=new Blob([payload],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download='kancolle-quest-settings-v4.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)});
+ $('fileInput').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const parsed=JSON.parse(await file.text());data=clone(validate(Array.isArray(parsed)?parsed:parsed.data));if(parsed.state)state={...defaultState,...parsed.state};migrate();backfillRewards(data);const count=cascadeOff();save();location.reload()}catch(err){showNotice('読込エラー: '+err.message,true)}finally{e.target.value=''}});
+ $('editJson').addEventListener('click',()=>{$('jsonText').value=JSON.stringify(data,null,2);$('jsonEditor').classList.remove('hidden')});
+ $('cancelJson').addEventListener('click',()=>{$('jsonEditor').classList.add('hidden')});
+ $('applyJson').addEventListener('click',()=>{try{data=clone(validate(JSON.parse($('jsonText').value)));migrate();backfillRewards(data);const count=cascadeOff();save();updateAddPrereqs();renderAll();$('jsonEditor').classList.add('hidden');showNotice('JSONを反映しました。'+(count?'前提不足の'+count+'件をOFFにしました。':''))}catch(err){showNotice('JSONの形式が不正です: '+err.message,true)}});
+ $('addForm').addEventListener('submit',e=>{e.preventDefault();try{
+  const q={id:'custom-'+Date.now(),name:$('addName').value.trim(),period:$('addPeriod').value,category:'手動追加',active:true,completion:100,startMonth:Number($('addMonth').value),rewards:{},source:'',note:'',prerequisites:[...$('addPrereqs').selectedOptions].map(o=>o.value)};
+  if(!q.name)throw Error('任務名を入力してください');
+  if(q.period==='D')q.dailyWeekdays=clone(PRESET_DAYS[state.dailyDefaultDays]);if(q.period==='W'){q.weeklyWeeksPerMonth='all';q.weeklyPlacement='first'}if(q.period==='Q')q.quarterOffset=state.quarterDefaultOffset;if(q.period==='Y')q.executionMonth=q.startMonth;
+  for(const [id,k] of [['addScrew','ネジ'],['addDev','釘'],['addBurner','バーナー'],['addBucket','バケツ']]){const v=Number($(id).value)||0;if(v)q.rewards[k]=v}
+  const extra=$('addExtraRewards').value.trim();if(extra){for(const p of extra.split(/[,，]/)){const m=p.trim().match(/^(.+?)\s*[:：]\s*(-?\d+)$/);if(!m)throw Error('その他報酬は「燃料:200, 勲章:1」の形式にしてください');q.rewards[m[1].trim()]=(q.rewards[m[1].trim()]||0)+Number(m[2])}}
+  const choice=$('addChoices').value.trim();if(choice){const opts=choice.split(/[|｜]/).map(s=>s.trim()).filter(Boolean).map(s=>{const rewards={};for(const p of s.split(/[,，]/)){const m=p.trim().match(/^(.+?)\s*[:：]\s*(-?\d+)$/);if(!m)throw Error('選択報酬は「ネジ:2 | 釘:6」の形式にしてください');rewards[m[1].trim()]=Number(m[2])}return{label:textOfRewards(rewards),rewards}});if(opts.length<2)throw Error('選択報酬は2種類以上入力してください');q.choiceGroups=[{name:'選択報酬',options:opts,selected:0}]}
+  validate([...data,q]);q.active=isUnlocked(q);data.push(q);save();$('addForm').reset();updateAddPrereqs();renderAll();showNotice('追加しました。'+(q.active?'':'前提がOFFのため、任務はOFFで登録しました。'));
+ }catch(err){showNotice(err.message,true)}});
+ updateAddPrereqs();
+ setupComparison();
+}
+setupControls();renderAll();
+if(migratedDisabled){showNotice('前提任務がOFFだったため、後続'+migratedDisabled+'件をOFFにしました。上流任務をONにすると選択できるようになります。')}
+
+</script>
+</body></html>
