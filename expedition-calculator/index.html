@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="艦これの遠征運用パターンから週間・月間・年間の資源獲得量と補給費を計算する非公式ツールです。">
+<meta name="color-scheme" content="light">
+<title>艦これ遠征収支シミュレータ</title>
+<style>
+:root{font-family:Inter,"Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;color:#183044;background:#f1f5f9;font-size:14px;font-synthesis:none}*{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #83bdf3;outline-offset:1px}a{color:#176dab}p{line-height:1.7}h1,h2,h3{letter-spacing:-.025em}h1{margin:0;font-size:24px}h2{margin:0;font-size:17px}h3{font-size:14px;margin:0 0 6px}.container{max-width:1190px;margin:auto;padding:0 18px 60px}.top{background:linear-gradient(115deg,#102b43,#1e4c68);color:white;padding:30px 0 52px;margin-bottom:-29px}.top .container{padding-bottom:0}.brand{display:flex;align-items:center;gap:12px}.mark{width:42px;height:42px;border:1px solid #7ca6bc;border-radius:12px;display:grid;place-items:center;font-size:23px;color:#9ed7e5;background:#24445d}.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#a0c5d7;font-weight:800}.subtitle{margin:7px 0 0;color:#bfd4df;font-size:12px}.toprow{display:flex;justify-content:space-between;align-items:center;gap:18px}.topactions{display:flex;gap:8px;flex-wrap:wrap}.shell{position:relative}.panel{background:#fff;border:1px solid #dce6ed;border-radius:15px;box-shadow:0 4px 15px rgba(18,52,76,.045)}.summary{padding:20px 22px 18px}.shead{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:15px}.segment{display:flex;background:#eaf0f5;border-radius:10px;padding:3px;gap:3px}.segment button{border:0;background:none;color:#62778b;border-radius:8px;padding:8px 15px;font-size:12px;font-weight:750}.segment button.active{color:#19354a;background:white;box-shadow:0 1px 4px #bdcedc}.resource-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.res{border-radius:11px;padding:16px 15px;border:1px solid #e5ecf1;background:#fafcfd}.res .symbol{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:7px}.res .label{font-size:12px;color:#5d7387;font-weight:700}.res .num{font-size:clamp(17px,2.5vw,29px);letter-spacing:-.04em;font-weight:800;font-variant-numeric:tabular-nums;margin-top:9px;white-space:nowrap}.res .minor{font-size:11px;color:#7890a0;margin-top:4px}.resource-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:13px;color:#678092;font-size:12px}.dot{width:6px;height:6px;border-radius:50%;display:inline-block;background:#21ad82;margin-right:5px}.nav{display:flex;gap:4px;border-bottom:1px solid #dce6ed;margin-top:16px;overflow-x:auto}.nav button{padding:13px 17px;background:transparent;color:#6f8595;border:0;border-bottom:3px solid transparent;white-space:nowrap;font-weight:750}.nav button.active{color:#126f99;border-color:#147ba9}.content{margin-top:18px}.row-between{display:flex;align-items:center;justify-content:space-between;gap:12px}.row-wrap{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.stack{display:flex;flex-direction:column;gap:16px}.section{padding:21px}.sectionhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}.sectionhead p{font-size:12px;color:#718698;margin:5px 0 0}.btn{border:1px solid #cedce5;background:white;color:#335b76;padding:8px 11px;border-radius:9px;font-size:12px;font-weight:760;transition:.13s}.btn:hover{background:#eef5f9;border-color:#a4c2d4}.btn.primary{background:#166f97;border-color:#166f97;color:white}.btn.primary:hover{background:#0e5b7c}.btn.dark{background:#1a344b;color:#fff;border-color:#2e5268}.btn.danger{color:#b3414c;border-color:#efcbd0}.btn.tiny{padding:5px 9px;font-size:11px}.btn.ghost{border:0;background:transparent}.btn.light{color:white;border-color:#66879e;background:#31556e}.note{font-size:12px;color:#657c8d;line-height:1.65}.warning{background:#fff9ed;border:1px solid #f1deae;color:#886218;border-radius:9px;padding:10px 12px;margin:10px 0;font-size:12px;line-height:1.65}.oknote{background:#eef8f5;color:#337a68;border:1px solid #d6eee7;padding:10px 12px;border-radius:9px;font-size:12px}.notice{padding:12px 14px;border-radius:9px;background:#edf4fa;color:#456c84;font-size:12px}.field{display:flex;flex-direction:column;gap:5px;min-width:0}.field label,.field .flabel{font-weight:700;font-size:11px;color:#617689}input[type=text],input[type=number],select,textarea{background:#fff;border:1px solid #d3e0e8;border-radius:8px;color:#24425a;padding:8px 9px;min-width:0;max-width:100%;width:100%;box-sizing:border-box}input[type=number]{font-variant-numeric:tabular-nums}input[type=checkbox]{accent-color:#187fa6;width:16px;height:16px;vertical-align:middle}textarea{resize:vertical;min-height:105px;font-family:ui-monospace,Consolas,monospace;font-size:12px}input:disabled{background:#edf1f4}.field.narrow{width:82px;flex-shrink:0}.field.medium{width:155px}.grow{flex:1;min-width:110px}.cols-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.mini-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.preset-list{display:flex;gap:7px;overflow:auto;padding-bottom:4px;margin-bottom:13px}.preset-tab{border:1px solid #d4e2eb;border-radius:10px;background:#fff;padding:10px 14px;white-space:nowrap;min-width:106px;text-align:left;color:#44677d;font-weight:750}.preset-tab.selected{background:#ecf6fa;border-color:#65abc3;color:#106789}.preset-tab span{display:block;font-weight:500;font-size:11px;color:#8296a4;margin-top:3px}.entry{border:1px solid #e0e8ee;border-radius:11px;padding:13px;margin:9px 0;background:#fbfdfd}.entry-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.entry-top>.field:first-child{min-width:240px;flex:1 1 290px}.entry-top .field.count{width:95px}.entry-actions{display:flex;gap:4px;margin-left:auto}.entry-sub{font-size:11px;color:#7b8f9b;margin-top:9px;display:flex;gap:12px;flex-wrap:wrap}.entry-advanced{background:#f1f6f9;border-radius:10px;margin-top:12px;padding:12px}.entry-advanced .cols-form{margin-top:9px}.entry .summaryline{font-size:11px;color:#516d81}.chip{font-size:11px;font-weight:800;padding:4px 7px;border-radius:6px;background:#eef3f6;color:#547184;white-space:nowrap}.chip.blue{background:#e5f3fb;color:#137eab}.chip.amber{background:#fff1dc;color:#a26f1e}.chip.green{background:#e5f6ed;color:#2a805d}.sumstrip{display:flex;gap:15px;border-top:1px solid #e9eff3;padding-top:14px;margin-top:12px;flex-wrap:wrap}.sumstrip strong{color:#294a61}.day-row,.exception-row{display:grid;grid-template-columns:1fr 105px auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #edf1f4}.exception-row{grid-template-columns:1fr 1fr 1fr 85px auto}.smallhead{font-size:12px;color:#6a8495;font-weight:700;margin-bottom:7px}.monthtable{width:100%;border-collapse:collapse;margin-top:8px}.monthtable th,.monthtable td{border-bottom:1px solid #e8eef2;padding:10px 7px;text-align:right;font-size:12px}.monthtable th:first-child,.monthtable td:first-child{text-align:left}.monthtable th{background:#f5f8fb;color:#607889;font-size:11px}.right{text-align:right}.muted{color:#8295a2}.strong{font-weight:800}.fleetship{display:grid;grid-template-columns:1.6fr .65fr .75fr .75fr auto auto auto auto;gap:7px;align-items:end;border-bottom:1px solid #e8edf1;padding:10px 0}.fleetship .check-field{padding-bottom:7px;white-space:nowrap;font-size:11px}.fleetship .btn{margin-bottom:1px}.tag{font-size:10px;font-weight:800;border-radius:5px;background:#eef2f6;padding:2px 5px;color:#697f90}.mini-stat{padding:13px;border:1px solid #e1eaf0;border-radius:11px;background:#fafcfe}.mini-stat strong{display:block;font-size:19px;font-variant-numeric:tabular-nums;margin-top:5px}.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.compare-grid .panel{padding:16px}.difftable{width:100%;border-collapse:collapse;margin:13px 0}.difftable th,.difftable td{padding:13px 8px;border-bottom:1px solid #e6edf1;text-align:right;font-variant-numeric:tabular-nums}.difftable th:first-child,.difftable td:first-child{text-align:left}.difftable thead{color:#718696;background:#f5f9fb;font-size:11px}.positive{color:#14835d;font-weight:800}.negative{color:#c15c44;font-weight:800}.empty{border:1px dashed #cbdbe6;background:#f8fbfd;border-radius:11px;padding:20px;text-align:center;color:#7890a0;font-size:12px;margin:12px 0}.footnotes{font-size:11px;color:#8296a5;line-height:1.75;padding-top:15px}.footer{margin-top:22px;border-top:1px solid #d9e4ea;padding-top:16px}.divider{height:1px;background:#e5eef3;margin:18px 0}.subtle{font-size:11px;color:#8b9da8}.bar{height:9px;border-radius:99px;background:#e7eef3;overflow:hidden;display:flex;margin:9px 0}.bar div{height:100%}.bar .used{background:#59a8be}.bar .rest{background:#cedee8}.badge-sample{font-size:11px;color:#9b7024;background:#fff3dd;padding:4px 8px;border-radius:7px;font-weight:700}footer a{color:#527d96}.hidden{display:none!important}
+/* v1.1: fleet occupation and reverse expedition mapping */
+.occupation{margin-top:17px;padding:16px;border:1px solid #dbe6ed;border-radius:11px;background:#f8fbfe}
+.occupation h3{margin:0;font-size:13px}
+.occupation .note:last-child{margin-bottom:0}
+.occ-row{display:grid;grid-template-columns:minmax(105px,1fr) minmax(90px,2fr) minmax(115px,auto);align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #e8eef3}
+.occ-row:last-of-type{border-bottom:0}
+.occ-name{font-size:12px;font-weight:750;color:#3d5d72;min-width:0;overflow-wrap:anywhere}
+.occ-meter{height:9px;border-radius:100px;background:#dfe9f0;overflow:hidden}
+.occ-fill{height:100%;border-radius:100px;background:#4aa6bf;min-width:0}
+.occ-fill.over{background:#e19942}
+.occ-value{text-align:right;font-variant-numeric:tabular-nums;font-size:12px;font-weight:750;white-space:nowrap}
+.total-meter{height:11px;margin:13px 0 5px}
+.map-groups{margin-top:15px}
+.fleet-map-group{margin:13px 0;border:1px solid #e1eaf0;padding:14px;border-radius:12px;background:#fff}
+.fleet-map-group .entry{margin:10px 0}
+.fleet-map-group .entry:last-of-type{margin-bottom:2px}
+.map-group-head h3{font-size:14px;margin:0 0 4px}
+.map-group-head p{margin:0}
+.map-empty{padding:10px 2px 0;margin:0}
+.map-monthly-summary{font-size:14px;font-weight:800;color:#30516a;cursor:pointer;padding:5px 0}
+@media(max-width:790px){.toprow{align-items:flex-start}.topactions{margin-top:8px}.two-col{grid-template-columns:1fr}.resource-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cols-form{grid-template-columns:1fr 1fr}.mini-grid{grid-template-columns:1fr 1fr}.fleetship{grid-template-columns:1.4fr .6fr .8fr .8fr;gap:6px}.fleetship .check-field{padding:6px 3px}.fleetship .btn{align-self:end}.exception-row{grid-template-columns:1fr 1fr 76px auto}.exception-row input:first-child{grid-column:span 2}.compare-grid{grid-template-columns:1fr}.summary{padding:16px}.res{padding:12px}.section{padding:16px}.top{padding:23px 0 47px}.container{padding-left:12px;padding-right:12px}.entry-top>.field:first-child{min-width:190px;flex-basis:200px}}
+@media(max-width:520px){h1{font-size:19px}.brand{align-items:flex-start}.toprow{display:block}.topactions{margin-top:14px}.segment button{padding:7px 10px}.shead{align-items:flex-start}.sectionhead{display:block}.sectionhead>.row-wrap{margin-top:9px}.day-row{grid-template-columns:1fr 95px auto}.exception-row{grid-template-columns:1fr 1fr}.exception-row>*:first-child{grid-column:span 2}.exception-row .btn{justify-self:end}.entry-top>.field:first-child{min-width:100%;flex-basis:100%}.entry-actions{margin-left:0}.field.medium{width:130px}.col-xs{grid-column:span 2}.difftable th,.difftable td{padding:10px 4px;font-size:11px}}
+
+@media(max-width:520px){.occ-row{grid-template-columns:1fr auto;gap:6px}.occ-row .occ-meter{grid-column:1/-1;grid-row:2}.occ-value{grid-column:2;grid-row:1}.occupation{padding:12px}.fleet-map-group{padding:10px}.map-group-head{flex-wrap:wrap}.map-group-head .btn{width:100%;margin-top:7px}}
+
+/* v1.2: expedition picker with base rewards and duration */
+.exp-field{flex:1 1 290px;min-width:240px;position:relative}
+.exp-picker{position:relative;width:100%}
+.exp-picker[open]{z-index:40}
+.entry:has(.exp-picker[open]){position:relative;z-index:30}
+.exp-picker-trigger{min-height:37px;display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border:1px solid #d3e0e8;border-radius:8px;background:#fff;color:#24425a;list-style:none;cursor:pointer}
+.exp-picker-trigger::-webkit-details-marker{display:none}
+.exp-picker-trigger:focus-visible{outline:3px solid #83bdf3;outline-offset:1px}
+.exp-picker[open]>.exp-picker-trigger{border-color:#4b9cc1;box-shadow:0 0 0 2px #dceff8}
+.exp-option-title{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:left;font-size:12px}
+.exp-picker-trigger .exp-option-title{font-size:13px}
+.exp-picker-trigger .exp-caret{flex-shrink:0}
+.exp-option-meta{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-shrink:0;white-space:nowrap}
+.exp-time{color:#597b91;background:#edf4f8;border-radius:5px;padding:3px 6px;font-size:11px;font-weight:750;font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.exp-resources{display:inline-flex;align-items:center;gap:3px}
+.exp-res{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 3px;border-radius:4px;font-size:11px;font-weight:850;line-height:1}
+.exp-res-fuel{color:#a75a14;background:#fff0df}
+.exp-res-ammo{color:#b44c56;background:#fff0f0}
+.exp-res-steel{color:#536579;background:#eaf0f5}
+.exp-res-bauxite{color:#137c8b;background:#e1f5f5}
+.exp-caret{font-size:12px;color:#678498;transition:transform .15s}
+.exp-picker[open] .exp-caret{transform:rotate(180deg)}
+.exp-picker-menu{position:absolute;top:calc(100% + 5px);left:0;width:min(565px,calc(100vw - 52px));background:#fff;border:1px solid #cbdfe9;border-radius:11px;box-shadow:0 14px 38px rgba(15,49,73,.22);z-index:50;overflow:hidden}
+.exp-picker-search{padding:9px;border-bottom:1px solid #e4edf3;background:#f8fbfd}
+.exp-picker-search input{width:100%;background:white;border:1px solid #d3e0e8;border-radius:7px;padding:9px}
+.exp-picker-results{max-height:350px;overflow-y:auto;overscroll-behavior:contain}
+.exp-choice{display:flex;align-items:center;gap:9px;width:100%;border:0;border-bottom:1px solid #edf2f5;background:white;color:#28475d;padding:10px 12px;cursor:pointer;text-align:left;min-height:43px}
+.exp-choice:last-child{border-bottom:0}
+.exp-choice:hover,.exp-choice:focus-visible{background:#eef7fb}
+.exp-choice:focus-visible{outline:2px solid #83bdf3;outline-offset:-2px}
+.exp-choice.selected{background:#eff7fa;font-weight:750}
+.exp-picker-empty{padding:15px;text-align:center;font-size:12px;color:#718899}
+@media(max-width:580px){
+ .exp-field{min-width:100%;flex-basis:100%}
+ .exp-picker-menu{width:100%}
+ .exp-picker-trigger{gap:5px;padding:7px}
+ .exp-option-meta{gap:4px}
+ .exp-res{min-width:18px;height:19px}
+ .exp-choice{gap:5px;padding:10px 8px}
+ .exp-time{padding:3px 4px}
+}
+
+/* v1.3 scheduler: independent expedition slot timelines and daily departure editor */
+.timeline-head,.timeline-row{display:grid;grid-template-columns:82px minmax(0,1fr);gap:10px;align-items:center}
+.timeline-hours{display:flex;justify-content:space-between;color:#71879a;font-size:10px;font-variant-numeric:tabular-nums;padding-bottom:7px}
+.timeline-row{margin:8px 0}
+.timeline-label{font-size:12px;font-weight:800;color:#31546d}
+.timeline-track{position:relative;height:40px;border:1px solid #d5e2eb;border-radius:7px;background:repeating-linear-gradient(90deg,transparent 0%,transparent calc(16.6667% - 1px),#dae5ec calc(16.6667% - 1px),#dae5ec 16.6667%),#f1f6fa;overflow:hidden}
+.timeline-bar{position:absolute;top:5px;bottom:5px;background:#327aa3;border:1px solid #1f5f85;border-radius:5px;display:flex;align-items:center;padding:0 4px;color:white;font-size:10px;white-space:nowrap;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.timeline-bar span{overflow:hidden;text-overflow:ellipsis}
+.schedule-entry{border:1px solid #e1eaf0;border-radius:10px;padding:10px 12px;margin-top:10px;background:#fbfdff}
+.schedule-entry-fields{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.schedule-entry-fields .field.exp-field{flex:2 1 280px;min-width:200px}
+.schedule-entry-fields .field{flex:1 1 115px;min-width:100px}
+.schedule-entry-fields .field.schedule-clock{flex:0 0 137px}
+.schedule-entry-fields .field.schedule-formation{flex:1 1 145px}
+.schedule-entry-fields input[type=time]{font-variant-numeric:tabular-nums}
+.schedule-entry .schedule-remove,.schedule-entry .schedule-duplicate{flex:none;margin-bottom:1px}
+.schedule-entry .schedule-duplicate{white-space:nowrap}
+.schedule-clock .schedule-time-input{font-variant-numeric:tabular-nums;letter-spacing:.08em}
+.schedule-entry-note{display:flex;gap:14px;flex-wrap:wrap;color:#74889a;font-size:11px;margin-top:6px}
+.schedule-entry-note .scheduled{color:#176a4b;font-weight:750}
+.schedule-entry-note .unplaced{color:#b17c2b;font-weight:750}
+.schedule-entry.schedule-conflict{border-color:#e9c77e;background:#fffaf0}
+@media(max-width:650px){.timeline-head,.timeline-row{grid-template-columns:57px minmax(0,1fr);gap:5px}.timeline-label{font-size:11px}.timeline-hours{font-size:9px}.schedule-entry-fields .field.exp-field{flex:1 1 100%;min-width:0}.schedule-entry-fields .field.schedule-clock{flex:1 1 120px}.schedule-entry-fields .field.schedule-formation{flex:1 1 160px}}
+
+
+/* v1.5: per-preset operational day from HHMM to the same time tomorrow */
+.schedule-day-start{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;background:#eef6fb;border:1px solid #d5e7f0;border-radius:10px;padding:12px;margin-bottom:12px}
+.schedule-day-start .field.schedule-clock{width:178px;flex-shrink:0}
+.schedule-day-start .note{flex:1;min-width:190px;margin:0 0 5px}
+.schedule-day-start input{font-variant-numeric:tabular-nums;letter-spacing:.06em}
+
+/* v1.6: recurring intervals when the user cannot operate the game */
+.schedule-unavailable{padding:14px;margin:10px 0;border:1px solid #d9e6ed;border-radius:10px;background:#f9fcfe}
+.schedule-unavailable .row-between{gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.schedule-unavailable h3{font-size:14px;margin:0}
+.schedule-unavailable .note{margin:3px 0 8px}
+.schedule-away-row{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin:8px 0}
+.schedule-away-row .field.schedule-clock{flex:0 1 135px;min-width:105px}
+.schedule-away-row input{font-variant-numeric:tabular-nums;letter-spacing:.06em}
+.away-separator{margin-bottom:8px;color:#5d7587}
+.schedule-away-row .btn{margin-bottom:1px}
+.timeline-unavailable{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,rgba(210,136,66,.20) 0,rgba(210,136,66,.20) 5px,rgba(230,170,106,.09) 5px,rgba(230,170,106,.09) 10px);z-index:1;pointer-events:none}
+.timeline-bar{z-index:2}
+@media(max-width:480px){.schedule-away-row{gap:6px}.schedule-away-row .field.schedule-clock{flex:1 1 105px}}
+
+/* v1.7 advisory schedule warnings; never prevent an otherwise valid departure edit. */
+.schedule-entry-note .warning{margin:0;padding:4px 8px}
+.schedule-entry-note .chip .btn{margin-left:5px}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>window.EXPEDITIONS=[{"id":"01","name":"練習航海","minutes":15,"rewards":{"fuel":0,"ammo":30,"steel":0,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":30,"ammo":0}},{"id":"02","name":"長距離練習航海","minutes":30,"rewards":{"fuel":0,"ammo":100,"steel":30,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":50,"ammo":0}},{"id":"03","name":"警備任務","minutes":20,"rewards":{"fuel":30,"ammo":30,"steel":40,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":30,"ammo":20}},{"id":"04","name":"対潜警戒任務","minutes":50,"rewards":{"fuel":0,"ammo":70,"steel":0,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":50,"ammo":0}},{"id":"05","name":"海上護衛任務","minutes":90,"rewards":{"fuel":200,"ammo":200,"steel":20,"bauxite":20},"monthly":false,"consumptionPct":{"fuel":50,"ammo":0}},{"id":"06","name":"防空射撃演習","minutes":40,"rewards":{"fuel":0,"ammo":0,"steel":0,"bauxite":80},"monthly":false,"consumptionPct":{"fuel":30,"ammo":20}},{"id":"07","name":"観艦式予行","minutes":60,"rewards":{"fuel":0,"ammo":0,"steel":50,"bauxite":30},"monthly":false,"consumptionPct":{"fuel":50,"ammo":0}},{"id":"08","name":"観艦式","minutes":180,"rewards":{"fuel":50,"ammo":100,"steel":50,"bauxite":50},"monthly":false,"consumptionPct":{"fuel":50,"ammo":20}},{"id":"09","name":"タンカー護衛任務","minutes":240,"rewards":{"fuel":350,"ammo":0,"steel":0,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":50,"ammo":0}},{"id":"10","name":"強行偵察任務","minutes":90,"rewards":{"fuel":0,"ammo":50,"steel":0,"bauxite":40},"monthly":false,"consumptionPct":{"fuel":30,"ammo":0}},{"id":"11","name":"ボーキサイト輸送任務","minutes":300,"rewards":{"fuel":0,"ammo":0,"steel":0,"bauxite":250},"monthly":false,"consumptionPct":{"fuel":50,"ammo":0}},{"id":"12","name":"資源輸送任務","minutes":480,"rewards":{"fuel":50,"ammo":250,"steel":200,"bauxite":50},"monthly":false,"consumptionPct":{"fuel":50,"ammo":0}},{"id":"13","name":"鼠輸送作戦","minutes":240,"rewards":{"fuel":240,"ammo":300,"steel":0,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":50,"ammo":40}},{"id":"14","name":"包囲陸戦隊撤収作戦","minutes":360,"rewards":{"fuel":0,"ammo":280,"steel":200,"bauxite":30},"monthly":false,"consumptionPct":{"fuel":50,"ammo":0}},{"id":"15","name":"囮機動部隊支援作戦","minutes":720,"rewards":{"fuel":0,"ammo":0,"steel":300,"bauxite":400},"monthly":false,"consumptionPct":{"fuel":50,"ammo":40}},{"id":"16","name":"艦隊決戦援護作戦","minutes":900,"rewards":{"fuel":500,"ammo":500,"steel":200,"bauxite":200},"monthly":false,"consumptionPct":{"fuel":50,"ammo":40}},{"id":"17","name":"敵地偵察作戦","minutes":45,"rewards":{"fuel":70,"ammo":90,"steel":50,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":30,"ammo":40}},{"id":"18","name":"航空機輸送作戦","minutes":300,"rewards":{"fuel":0,"ammo":0,"steel":300,"bauxite":150},"monthly":false,"consumptionPct":{"fuel":50,"ammo":20}},{"id":"19","name":"北号作戦","minutes":360,"rewards":{"fuel":400,"ammo":50,"steel":50,"bauxite":30},"monthly":false,"consumptionPct":{"fuel":50,"ammo":40}},{"id":"20","name":"潜水艦哨戒任務","minutes":120,"rewards":{"fuel":0,"ammo":0,"steel":150,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":50,"ammo":40}},{"id":"21","name":"北方鼠輸送作戦","minutes":140,"rewards":{"fuel":320,"ammo":270,"steel":0,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":80,"ammo":70}},{"id":"22","name":"艦隊演習","minutes":180,"rewards":{"fuel":0,"ammo":10,"steel":0,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":80,"ammo":70}},{"id":"23","name":"航空戦艦運用演習","minutes":240,"rewards":{"fuel":0,"ammo":50,"steel":0,"bauxite":130},"monthly":false,"consumptionPct":{"fuel":80,"ammo":80}},{"id":"24","name":"北方航路海上護衛","minutes":500,"rewards":{"fuel":500,"ammo":0,"steel":0,"bauxite":150},"monthly":false,"consumptionPct":{"fuel":90,"ammo":60}},{"id":"25","name":"通商破壊作戦","minutes":2400,"rewards":{"fuel":900,"ammo":0,"steel":500,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":50,"ammo":80}},{"id":"26","name":"敵母港空襲作戦","minutes":4800,"rewards":{"fuel":0,"ammo":0,"steel":0,"bauxite":900},"monthly":false,"consumptionPct":{"fuel":80,"ammo":80}},{"id":"27","name":"潜水艦通商破壊作戦","minutes":1200,"rewards":{"fuel":0,"ammo":0,"steel":800,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":80,"ammo":80}},{"id":"28","name":"西方海域封鎖作戦","minutes":1500,"rewards":{"fuel":0,"ammo":0,"steel":900,"bauxite":350},"monthly":false,"consumptionPct":{"fuel":80,"ammo":80}},{"id":"29","name":"潜水艦派遣演習","minutes":1440,"rewards":{"fuel":0,"ammo":50,"steel":0,"bauxite":100},"monthly":false,"consumptionPct":{"fuel":90,"ammo":40}},{"id":"30","name":"潜水艦派遣作戦","minutes":2880,"rewards":{"fuel":0,"ammo":50,"steel":0,"bauxite":100},"monthly":false,"consumptionPct":{"fuel":90,"ammo":70}},{"id":"31","name":"海外艦との接触","minutes":120,"rewards":{"fuel":0,"ammo":30,"steel":0,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":50,"ammo":0}},{"id":"32","name":"遠洋練習航海","minutes":1440,"rewards":{"fuel":50,"ammo":50,"steel":50,"bauxite":50},"monthly":false,"consumptionPct":{"fuel":90,"ammo":30}},{"id":"35","name":"MO作戦","minutes":420,"rewards":{"fuel":0,"ammo":0,"steel":240,"bauxite":280},"monthly":false,"consumptionPct":{"fuel":80,"ammo":80}},{"id":"36","name":"水上機基地建設","minutes":540,"rewards":{"fuel":480,"ammo":0,"steel":200,"bauxite":200},"monthly":false,"consumptionPct":{"fuel":80,"ammo":80}},{"id":"37","name":"東京急行","minutes":165,"rewards":{"fuel":0,"ammo":380,"steel":270,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":80,"ammo":80}},{"id":"38","name":"東京急行(弐)","minutes":175,"rewards":{"fuel":420,"ammo":0,"steel":200,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":80,"ammo":80}},{"id":"39","name":"遠洋潜水艦作戦","minutes":1800,"rewards":{"fuel":0,"ammo":0,"steel":300,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":90,"ammo":90}},{"id":"40","name":"水上機前線輸送","minutes":410,"rewards":{"fuel":300,"ammo":300,"steel":0,"bauxite":100},"monthly":false,"consumptionPct":{"fuel":80,"ammo":70}},{"id":"41","name":"ブルネイ泊地沖哨戒","minutes":60,"rewards":{"fuel":100,"ammo":0,"steel":0,"bauxite":20},"monthly":false,"consumptionPct":{"fuel":50,"ammo":50}},{"id":"45","name":"ボーキサイト船団護衛","minutes":200,"rewards":{"fuel":40,"ammo":0,"steel":0,"bauxite":220},"monthly":false,"consumptionPct":{"fuel":60,"ammo":40}},{"id":"A1","name":"兵站強化任務","minutes":25,"rewards":{"fuel":45,"ammo":45,"steel":0,"bauxite":0},"monthly":false,"consumptionPct":{"fuel":40,"ammo":0}},{"id":"A2","name":"海峡警備行動","minutes":55,"rewards":{"fuel":70,"ammo":40,"steel":0,"bauxite":10},"monthly":false,"consumptionPct":{"fuel":50,"ammo":20}},{"id":"A3","name":"長時間対潜警戒","minutes":135,"rewards":{"fuel":120,"ammo":0,"steel":60,"bauxite":60},"monthly":false,"consumptionPct":{"fuel":60,"ammo":30}},{"id":"B1","name":"南西方面航空偵察作戦","minutes":35,"rewards":{"fuel":0,"ammo":0,"steel":20,"bauxite":30},"monthly":false,"consumptionPct":{"fuel":45,"ammo":15}},{"id":"D1","name":"西方海域偵察作戦","minutes":120,"rewards":{"fuel":0,"ammo":20,"steel":20,"bauxite":100},"monthly":false,"consumptionPct":{"fuel":75,"ammo":50}},{"id":"A4","name":"南西方面連絡線哨戒","minutes":110,"rewards":{"fuel":80,"ammo":120,"steel":0,"bauxite":100},"monthly":true,"consumptionPct":{"fuel":75,"ammo":60}},{"id":"A5","name":"小笠原沖哨戒線","minutes":180,"rewards":{"fuel":0,"ammo":300,"steel":0,"bauxite":100},"monthly":true,"consumptionPct":{"fuel":80,"ammo":75}},{"id":"A6","name":"小笠原沖戦闘哨戒","minutes":210,"rewards":{"fuel":100,"ammo":500,"steel":100,"bauxite":200},"monthly":true,"greatItems":{"ネジ":1},"consumptionPct":{"fuel":90,"ammo":95}},{"id":"B2","name":"敵泊地強襲反撃作戦","minutes":520,"rewards":{"fuel":300,"ammo":200,"steel":100,"bauxite":0},"monthly":true,"consumptionPct":{"fuel":80,"ammo":60}},{"id":"B3","name":"南西諸島離島哨戒作戦","minutes":170,"rewards":{"fuel":0,"ammo":100,"steel":100,"bauxite":180},"monthly":true,"consumptionPct":{"fuel":65,"ammo":80}},{"id":"B4","name":"南西諸島離島防衛作戦","minutes":450,"rewards":{"fuel":0,"ammo":0,"steel":1200,"bauxite":650},"monthly":true,"greatItems":{"ネジ":1},"consumptionPct":{"fuel":85,"ammo":85}},{"id":"B5","name":"南西諸島捜索撃滅戦","minutes":390,"rewards":{"fuel":500,"ammo":500,"steel":1000,"bauxite":750},"monthly":true,"greatItems":{"ネジ":1},"consumptionPct":{"fuel":90,"ammo":95}},{"id":"B6","name":"精鋭水雷戦隊夜襲","minutes":350,"rewards":{"fuel":600,"ammo":1000,"steel":600,"bauxite":600},"monthly":true,"greatItems":{"ネジ":1},"consumptionPct":{"fuel":95,"ammo":95}},{"id":"42","name":"ミ船団護衛(一号船団)","minutes":480,"rewards":{"fuel":800,"ammo":0,"steel":0,"bauxite":200},"monthly":true,"consumptionPct":{"fuel":80,"ammo":65}},{"id":"43","name":"ミ船団護衛(二号船団)","minutes":720,"rewards":{"fuel":2000,"ammo":0,"steel":0,"bauxite":400},"monthly":true,"greatItems":{"ネジ":1},"consumptionPct":{"fuel":85,"ammo":90}},{"id":"44","name":"航空装備輸送任務","minutes":600,"rewards":{"fuel":0,"ammo":200,"steel":0,"bauxite":800},"monthly":true,"consumptionPct":{"fuel":80,"ammo":40}},{"id":"46","name":"南西海域戦闘哨戒","minutes":210,"rewards":{"fuel":300,"ammo":0,"steel":150,"bauxite":380},"monthly":true,"greatItems":{"ネジ":1},"consumptionPct":{"fuel":75,"ammo":95}},{"id":"D2","name":"西方潜水艦作戦","minutes":600,"rewards":{"fuel":0,"ammo":0,"steel":400,"bauxite":800},"monthly":true,"consumptionPct":{"fuel":90,"ammo":90}},{"id":"D3","name":"欧州方面友軍との接触","minutes":720,"rewards":{"fuel":0,"ammo":800,"steel":500,"bauxite":400},"monthly":true,"greatItems":{"ネジ":1},"consumptionPct":{"fuel":90,"ammo":95}},{"id":"E1","name":"ラバウル方面艦隊進出","minutes":450,"rewards":{"fuel":0,"ammo":600,"steel":600,"bauxite":1000},"monthly":true,"greatItems":{"ネジ":1},"consumptionPct":{"fuel":95,"ammo":85}},{"id":"E2","name":"強行鼠輸送作戦","minutes":185,"rewards":{"fuel":0,"ammo":480,"steel":0,"bauxite":0},"monthly":true,"greatItems":{"ネジ":1},"consumptionPct":{"fuel":90,"ammo":95}}];</script>
+<script>
+/* 艦これ遠征収支 — browser/node-compatible pure calculation functions */
+(function(root){
+'use strict';
+const KEYS=['fuel','ammo','steel','bauxite','ネジ'];
+const zero=()=>Object.fromEntries(KEYS.map(k=>[k,0]));
+const add=(a,b,factor=1)=>{for(const k of KEYS) a[k]=(a[k]||0)+(b[k]||0)*factor;return a};
+const clamp=(n,lo,hi)=>Math.max(lo,Math.min(hi,Number.isFinite(Number(n))?Number(n):lo));
+const EQUIPMENT={68:{name:'大発動艇',base:.05,regular:true},193:{name:'特大発動艇',base:.05,special:true},166:{name:'陸戦隊',base:.02},167:{name:'特二式内火艇',base:.01},408:{name:'装甲艇(AB艇)',base:.02},409:{name:'武装大発',base:.03},75:{name:'ドラム缶',drum:true}};
+const DRUM_GREAT={"21":[3,4],"37":[3,5],"38":[4,10],"24":[1,2],"40":[1,4],"44":[3,8],"E2":[3,6]};
+const SPECIAL_PROB_IDS=new Set(['A2','A3','41','45','A4','A5','A6','B3','B4','B5','B6','43','44','46','D3','E1','E2']);
+function equipmentTotals(fleet){
+ const eq=[];
+ for(const ship of fleet?.ships||[]) for(const item of ship.items||[]) eq.push(item);
+ const ext=fleet?.extraEquipment||{};
+ for (const [key,id] of [['daihatsu',68],['tokudai',193],['tank',166],['katsu',167],['armed',409],['drum',75]]) {
+   for(let i=0;i<clamp(ext[key]||0,0,30);i++)eq.push({id,rf:clamp(ext.star||0,0,10),fromManual:true});
+ }
+ let base=0,regular=0,special=0,drum=0,stars=0,starCount=0,unknown=[];
+ const shipDrums=new Set();
+ for(const ship of fleet?.ships||[]){if((ship.items||[]).some(item=>Number(item.id)===75))shipDrums.add(ship.id||ship.name)}
+ for(const item of eq){const e=EQUIPMENT[Number(item.id)];if(!e){if(item.id)unknown.push(item.id);continue;}
+   if(e.drum){drum++;continue;}base+=e.base||0;if(e.regular)regular++;if(e.special)special++;
+   stars+=clamp(item.rf||0,0,10);starCount++;
+ }
+ // Manual drum counts have no ship assignment; can't verify drum-carrying ship count with only manual counts.
+ const kinu=(fleet?.ships||[]).some(x=>x.kinu);
+ base=Math.min(.2,base+(kinu?.05:0));
+ const averageStars=starCount?stars/starCount:0;
+ const bonusStar=base*.01*averageStars;
+ const bonusSpecial=special<3?.02*special:special===3?[.05,.05,.052,.054,.054][Math.min(regular,4)]:[.054,.056,.058,.059,.06][Math.min(regular,4)];
+ return {base,bonusStar,bonusSpecial,percent:(base+bonusStar+bonusSpecial)*100,drum,drumShips:shipDrums.size,regular,special,unknown};
+}
+function getProb(row,fleet,commonPercent,exp){
+ if(row.probMode==='manual')return {value:clamp(row.greatPct,0,100)/100,description:'個別指定'};
+ if(row.probMode==='fleet'&&fleet){
+   const ships=fleet.ships||[];const kira=ships.filter(x=>x.kira).length;
+   const dr=DRUM_GREAT[exp?.id];const t=equipmentTotals(fleet);
+   if(dr && kira>=4 && t.drum>=dr[1] && t.drumShips>=dr[0])return {value:1,description:'ドラム缶条件（確定）'};
+   if(dr)return {value:clamp(commonPercent,0,100)/100,description:'共通率で代用',warning:'ドラム缶型の大成功率を自動判定できないため、共通設定を使用'};
+   if(SPECIAL_PROB_IDS.has(exp?.id))return {value:clamp(commonPercent,0,100)/100,description:'共通率で代用',warning:'特殊判定型のため共通大成功率を使用'};
+   if(kira===ships.length&&kira===6)return {value:1,description:'6隻全キラ'};
+   if(kira===ships.length&&kira===5)return {value:.95,description:'5隻全キラ（推定）'};
+   if(kira===ships.length&&kira===4)return {value:.80,description:'4隻全キラ（推定）'};
+   return {value:0,description:'通常型：全キラ条件外'};
+ }
+ return {value:clamp(commonPercent,0,100)/100,description:row.probMode==='fleet'?'艦隊未設定→共通':'共通設定'};
+}
+function getBonus(row,fleet){
+ if(row.bonusMode==='manual')return {percent:clamp(row.bonusPct||0,0,100),automatic:false,parts:null};
+ if(row.bonusMode==='fleet'&&fleet){let parts=equipmentTotals(fleet);return {percent:parts.percent,automatic:true,parts};}
+ return {percent:0,automatic:false,parts:null};
+}
+function shipCost(ship,pct,key){
+ const n=Number(ship?.[key]);
+ if(ship?.[key]===null||ship?.[key]===undefined||ship?.[key]===''||!Number.isFinite(n))return null;
+ // Ship fuel/ammo capacity is entered as *pre-marriage* maximum supply cost.
+ return Math.floor(Math.floor(n*(ship.married?.85:1))*pct/100+1e-9);
+}
+function calcFuelCost(row,exp,fleet){
+ if(row.costMode==='manual')return {fuel:clamp(row.costFuel,0,5000),ammo:clamp(row.costAmmo,0,5000),status:'手入力'};
+ if(!fleet)return null;
+ const ships=fleet.ships||[];
+ if(!ships.length)return null;
+ let fuel=0,ammo=0;
+ for(const ship of ships){const f=shipCost(ship,exp.consumptionPct.fuel,'fuel');const a=shipCost(ship,exp.consumptionPct.ammo,'ammo');if(f===null||a===null)return null;fuel+=f;ammo+=a;}
+ return {fuel,ammo,status:'編成から算出'};
+}
+function expeditionOutcome(row,exp,fleets,settings){
+ const fleet=fleets.find(x=>String(x.id)===String(row.fleetId));const prob=getProb(row,fleet,settings.commonGreatPct,exp);const bonus=getBonus(row,fleet);
+ let earned=zero(),cost=zero(),detail={};const b=bonus.percent/100;
+ for(const key of KEYS.slice(0,4)){
+   const base=exp.rewards[key]||0;
+   let normal,great;
+   if(bonus.automatic&&bonus.parts){const {base:part,bonusStar,bonusSpecial}=bonus.parts;
+     normal=Math.floor(base*(1+part+bonusStar)+1e-8)+Math.floor(base*bonusSpecial+1e-8);
+     great=Math.floor(base*1.5*(1+part+bonusStar)+1e-8)+Math.floor(base*1.5*bonusSpecial+1e-8);
+   }else{normal=Math.floor(base*(1+b)+1e-8);great=Math.floor(base*1.5*(1+b)+1e-8);}
+   detail[key]={normal,great};earned[key]=normal*(1-prob.value)+great*prob.value;
+ }
+ for(const [key,n] of Object.entries(exp.greatItems||{}))earned[key]=(earned[key]||0)+n*prob.value;
+ const shipCosts=calcFuelCost(row,exp,fleet);let costKnown=!!shipCosts;if(shipCosts){cost.fuel=shipCosts.fuel;cost.ammo=shipCosts.ammo;}
+ return {exp,prob,bonus,earned,cost,costKnown,detail,fleetName:fleet?.name||'',hasFleet:!!fleet};
+}
+// Expedition occupation is measured as cumulative fleet-minutes, not elapsed wall-clock time.
+// The three available expedition slots permit at most 72 fleet-hours per day in total.
+// A named fleet may not occupy more than 24h/day. Unassigned rows count towards
+// the total but cannot be individually checked for collisions.
+function occupationForRows(rows,fleets,expeditions,monthly=false){
+ const map=new Map(expeditions.map(x=>[x.id,x]));
+ const groups=new Map();
+ for(const f of fleets||[])groups.set(String(f.id),{id:String(f.id),name:f.name||'名称未設定',minutes:0,runs:0,assigned:true});
+ groups.set('',{id:'',name:'編成なし',minutes:0,runs:0,assigned:false});
+ const details=[];let totalMinutes=0,totalRuns=0;
+ for(const row of rows||[]){
+   const exp=map.get(row.expId);if(!exp||!!exp.monthly!==!!monthly)continue;
+   const count=clamp(row.count,0,monthly?1:200);
+   if(count<=0)continue;
+   const minutes=clamp(exp.minutes,0,100000)*count;
+   const key=groups.has(String(row.fleetId||''))?String(row.fleetId||''):'';
+   const group=groups.get(key);
+   group.minutes+=minutes;group.runs+=count;
+   totalMinutes+=minutes;totalRuns+=count;
+   details.push({rowId:row.id,expId:exp.id,expName:exp.name,fleetId:key,count,minutes,oneRunMinutes:exp.minutes});
+ }
+ const list=[...groups.values()];
+ const warnings=[];
+ if(!monthly){
+   if(totalMinutes>72*60+1e-7)warnings.push(`合計 ${formatOccupation(totalMinutes)} は、3艦隊×24時間＝72時間を超えています。`);
+   for(const g of list)if(g.assigned&&g.minutes>24*60+1e-7)warnings.push(`${g.name} の占有 ${formatOccupation(g.minutes)} は1日24時間を超えています。`);
+ }
+ return {totalMinutes,totalRuns,groups:list,details,unassignedMinutes:groups.get('').minutes,warnings};
+}
+function formatOccupation(minutes){
+ const m=Math.round(minutes);
+ return `${Math.floor(m/60)}時間${m%60?`${m%60}分`:''}`;
+}
+function sumPreset(preset,fleets,settings,expeditions){
+ const map=new Map(expeditions.map(x=>[x.id,x]));const earned=zero(),cost=zero(),details=[];let allCostKnown=true,runs=0,unestimated=0;
+ for(const row of preset?.rows||[]){const exp=map.get(row.expId);const count=clamp(row.count,0,200);if(!exp||count===0||exp.monthly)continue;
+ const v=expeditionOutcome(row,exp,fleets,settings);add(earned,v.earned,count);
+ if(v.costKnown)add(cost,v.cost,count);else{allCostKnown=false;unestimated+=count;}
+ runs+=count;details.push({...v,count,row});}
+ return {earned,cost,allCostKnown,runs,unestimated,details,occupation:occupationForRows(preset?.rows,fleets,expeditions,false)};
+}
+function sumMonthly(monthlyRows,fleets,settings,expeditions){
+ const earned=zero(),cost=zero(),details=[];let allCostKnown=true,runs=0,unestimated=0;
+ const m=new Map(expeditions.map(x=>[x.id,x]));
+ for(const row of monthlyRows||[]){const exp=m.get(row.expId);if(!exp||!exp.monthly)continue;const count=clamp(row.count,0,1);if(!count)continue;
+ let v=expeditionOutcome(row,exp,fleets,settings);add(earned,v.earned,count);if(v.costKnown)add(cost,v.cost,count);else{allCostKnown=false;unestimated+=count;}runs+=count;details.push({...v,count,row});}
+ return {earned,cost,allCostKnown,runs,unestimated,details,occupation:occupationForRows(monthlyRows,fleets,expeditions,true)};
+}
+function computePlan(state,expeditions){
+ const presets=state.presets||[],fleets=state.fleets||[],settings=state.settings||{commonGreatPct:80};
+ const perPreset=Object.fromEntries(presets.map(p=>[p.id,sumPreset(p,fleets,settings,expeditions)]));
+ const weeklyEarn=zero(),weeklyCost=zero();let weekRuns=0,weekUnknown=0,weekMinutes=0,allocDays=0;
+ const dayMap={};
+ for(const a of state.weekly||[]){const days=clamp(a.days,0,7);const p=perPreset[a.presetId];if(!p)continue;dayMap[a.presetId]=(dayMap[a.presetId]||0)+days;
+   add(weeklyEarn,p.earned,days);add(weeklyCost,p.cost,days);weekRuns+=p.runs*days;weekUnknown+=p.unestimated*days;weekMinutes+=p.occupation.totalMinutes*days;allocDays+=days;}
+ const MONTH_WEEKS=365/7/12;
+ const monthEarn=add(zero(),weeklyEarn,MONTH_WEEKS),monthCost=add(zero(),weeklyCost,MONTH_WEEKS);
+ let monthRuns=weekRuns*MONTH_WEEKS,monthUnknown=weekUnknown*MONTH_WEEKS,monthMinutes=weekMinutes*MONTH_WEEKS;const warnings=[];
+ if(Math.abs(allocDays-7)>1e-8)warnings.push(`週間の割当が ${allocDays} / 7日です。未割当日は計算に含みません。`);
+ const available=Object.fromEntries(Object.entries(dayMap).map(([id,days])=>[id,days*MONTH_WEEKS]));
+ for(const x of state.exceptions||[]){const replacement=perPreset[x.presetId],origin=perPreset[x.replaceId];if(!replacement||!origin)continue;
+   const desired=clamp(x.count,0,31);const allowed=Math.min(desired,available[x.replaceId]||0);available[x.replaceId]-=allowed;
+   if(allowed<desired)warnings.push(`月間例外「${x.name||'名称なし'}」は、置換元の日数を超えるため ${allowed.toFixed(2)}日で計上しました。`);
+   add(monthEarn,replacement.earned,allowed);add(monthEarn,origin.earned,-allowed);
+   add(monthCost,replacement.cost,allowed);add(monthCost,origin.cost,-allowed);
+   monthRuns+=allowed*(replacement.runs-origin.runs);
+   monthUnknown+=allowed*(replacement.unestimated-origin.unestimated);
+   monthMinutes+=allowed*(replacement.occupation.totalMinutes-origin.occupation.totalMinutes);
+ }
+ const once=sumMonthly(state.monthlyRows,fleets,settings,expeditions);
+ add(monthEarn,once.earned);add(monthCost,once.cost);monthRuns+=once.runs;monthUnknown+=once.unestimated;monthMinutes+=once.occupation.totalMinutes;
+ const yearEarn=add(zero(),monthEarn,12),yearCost=add(zero(),monthCost,12);
+ return {
+   weekly:{earned:weeklyEarn,cost:weeklyCost,runs:weekRuns,unestimated:weekUnknown,minutes:weekMinutes},
+   monthly:{earned:monthEarn,cost:monthCost,runs:monthRuns,unestimated:monthUnknown,minutes:monthMinutes},
+   yearly:{earned:yearEarn,cost:yearCost,runs:monthRuns*12,unestimated:monthUnknown*12,minutes:monthMinutes*12},
+   perPreset,monthlyOnce:once,warnings,allocDays,MONTH_WEEKS
+ };
+}
+function makeRow(expId){return {id:Math.random().toString(36).slice(2,10),expId,count:1,fleetId:'',probMode:'common',greatPct:80,bonusMode:'none',bonusPct:0,costMode:'fleet',costFuel:0,costAmmo:0};}
+function initial(){return {version:1,settings:{commonGreatPct:80},presets:[{id:'p1',name:'プリセット1',dayStart:0,rows:[]},{id:'p2',name:'プリセット2',dayStart:0,rows:[]},{id:'p3',name:'プリセット3',dayStart:0,rows:[]}],weekly:[{presetId:'p1',days:5},{presetId:'p2',days:2}],exceptions:[],monthlyRows:[],fleets:[]};}
+function sample(){const s=initial();s.presets[0].name='通常運用';s.presets[0].rows=[{...makeRow('05'),count:3},{...makeRow('37'),count:2},{...makeRow('11'),count:1}];s.presets[1].name='休日運用';s.presets[1].rows=[{...makeRow('02'),count:6},{...makeRow('06'),count:4},{...makeRow('05'),count:4}];s.presets[2].name='メンテ日';s.presets[2].rows=[{...makeRow('09'),count:1},{...makeRow('11'),count:1}];s.exceptions=[{id:'ex1',name:'月1回メンテ',presetId:'p3',replaceId:'p1',count:1}];return s;}
+
+// A scheduled run occupies one expedition slot, regardless of the selected ship formation.
+// Daily preset repeats every 1440 minutes: check previous/next day as well.
+function minutesOverlap(aStart,aEnd,bStart,bEnd){return aStart<bEnd&&bStart<aEnd;}
+function repeatingOverlap(aStart,aLength,bStart,bLength){
+ for(const offset of [-1440,0,1440])if(minutesOverlap(aStart,aStart+aLength,bStart+offset,bStart+offset+bLength))return true;
+ return false;
+}
+// A preset's operational day is [dayStart, dayStart + 1440) on an unwrapped timeline.
+// Wall-clock times before dayStart belong to the *following* calendar day.
+// Keep the stored HHMM minute value (0..1439) unchanged for backward compatibility.
+function dayStartMinutes(preset){
+ const m=Number(preset?.dayStart??0);
+ return Number.isInteger(m)&&m>=0&&m<1440?m:0;
+}
+function dayRelativeMinute(wallMinutes,dayStart=0){
+ return ((Number(wallMinutes)-dayStart)%1440+1440)%1440;
+}
+function dayAbsoluteMinute(wallMinutes,dayStart=0){
+ return dayStart+dayRelativeMinute(wallMinutes,dayStart);
+}
+// Time periods when the player cannot issue a new departure.
+// Interpret each HHMM interval as a daily recurring interval, including
+// windows that cross midnight or cross the configured operational-day border.
+// Return merged *absolute* ranges so adjacent/overlapping windows are treated
+// as one uninterrupted period. The values are not saved in this expanded form.
+function unavailableIntervals(preset){
+ const base=dayStartMinutes(preset),end=base+1440,parts=[];
+ for(const period of Array.isArray(preset?.unavailablePeriods)?preset.unavailablePeriods:[]){
+  const a=Number(period.start),b=Number(period.end);
+  if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||a>=1440||b<0||b>=1440||a===b)continue;
+  const start=dayAbsoluteMinute(a,base);
+  const duration=(b-a+1440)%1440;
+  for(const shift of [-1440,0,1440]){
+   const lo=start+shift,hi=lo+duration;
+   if(hi>base&&lo<end)parts.push({start:lo,end:hi});
+  }
+ }
+ parts.sort((a,b)=>a.start-b.start||a.end-b.end);
+ const merged=[];
+ for(const part of parts){
+  const last=merged[merged.length-1];
+  if(last&&part.start<=last.end)last.end=Math.max(last.end,part.end);
+  else merged.push({...part});
+ }
+ return merged;
+}
+function nextAvailableMinute(preset,returnMinute){
+ let when=Number(returnMinute);
+ if(!Number.isFinite(when))return returnMinute;
+ // Away periods recur every operational day, including for a departure
+ // continued past the day boundary by the non-blocking scheduler.
+ const windows=unavailableIntervals(preset);
+ const startIndex=Math.floor((when-dayStartMinutes(preset))/1440);
+ for(let day=startIndex-1;day<=startIndex+14;day++){
+  for(const interval of windows){
+   const lo=interval.start+day*1440,hi=interval.end+day*1440;
+   if(when>=lo&&when<hi)when=hi;
+  }
+ }
+ return when;
+}
+function scheduledRuns(preset,expeditions){
+ const rows=new Map((preset.rows||[]).map(r=>[r.id,r]));const expMap=new Map(expeditions.map(e=>[e.id,e]));
+ return (preset.schedule||[]).map(s=>{
+   const row=rows.get(s.rowId),exp=row?expMap.get(row.expId):null;
+   return {...s,row,exp,duration:exp?.minutes||0,formationId:row?.fleetId||''};
+ }).filter(s=>s.row&&s.exp);
+}
+function scheduleConflicts(candidate,others,dayStart=0){
+ if(!['2','3','4'].includes(String(candidate.slot))||candidate.start===null||candidate.start===undefined||candidate.start==='')return {hard:[],soft:[]};
+ const hard=[],soft=[],start=Number(candidate.start),duration=Number(candidate.duration);
+ if(!Number.isInteger(start)||start<0||start>=1440||!Number.isFinite(duration)||duration<=0)hard.push('開始時刻または所要時間が不正です。');
+ if(hard.length)return {hard,soft};
+ const dayEnd=dayStart+1440;
+ const offset=Math.max(0,Number(candidate.dayOffset)||0);
+ const departure=dayAbsoluteMinute(start,dayStart)+offset*1440;
+ const finish=departure+duration;
+ if(departure>=dayEnd)hard.push(`出発が基準時刻 ${clockString(dayEnd)} より後の運用日に入っています。`);
+ if(finish>dayEnd)hard.push(`この遠征は翌日の基準時刻 ${clockString(dayEnd)} を越えて帰投します。`);
+ // Keep checking other departures even when the day boundary is exceeded.
+ for(const other of others){
+  if(other.id===candidate.id||other.start===null||other.start===undefined||other.start===''||!['2','3','4'].includes(String(other.slot)))continue;
+  if(!repeatingOverlap(start,duration,Number(other.start),Number(other.duration)))continue;
+  if(String(candidate.slot)===String(other.slot))hard.push(`第${candidate.slot}艦隊の ${clockString(Number(other.start))} 発と時間が重複しています。`);
+  else if(candidate.formationId&&String(candidate.formationId)===String(other.formationId))soft.push(`別艦隊枠で同じ編成を同時使用しています（第${other.slot}艦隊 ${clockString(Number(other.start))} 発）。`);
+ }
+ return {hard,soft};
+}
+function clockString(minutes){const m=Math.floor(Number(minutes)||0);return `${String(Math.floor((m%1440)/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}${m>=1440?`（翌日）`:''}`;}
+// Scheduler time inputs use exactly four numeric digits, e.g. 0830 (08:30).
+// null means not assigned; undefined means invalid input.
+function parseClockDigits(value){
+ const raw=String(value??'').trim();
+ if(raw==='')return null;
+ if(!/^\d{4}$/.test(raw))return undefined;
+ const hour=Number(raw.slice(0,2)),minute=Number(raw.slice(2));
+ return hour<24&&minute<60?hour*60+minute:undefined;
+}
+function clockDigits(minutes){
+ if(minutes===null||minutes===undefined||minutes==='')return '';
+ const m=Number(minutes);
+ if(!Number.isInteger(m)||m<0)return '';
+ return `${String(Math.floor((m%1440)/60)).padStart(2,'0')}${String(m%60).padStart(2,'0')}`;
+}
+function scheduleAudit(preset,expeditions){
+ const runs=scheduledRuns(preset,expeditions),missing=runs.filter(x=>!['2','3','4'].includes(String(x.slot))||x.start===null||x.start===undefined||x.start==='').length;
+ const hard=[],soft=[],dayStart=dayStartMinutes(preset);
+ for(const r of runs){const issue=scheduleConflicts(r,runs,dayStart);for(const x of issue.hard)if(!hard.includes(x))hard.push(x);for(const x of issue.soft)if(!soft.includes(x))soft.push(x);}
+ return {runs,missing,hard,soft,placed:runs.length-missing,complete:!missing&&!hard.length,dayStart};
+}
+
+root.ExpCalc={minutesOverlap,repeatingOverlap,dayStartMinutes,dayRelativeMinute,dayAbsoluteMinute,unavailableIntervals,nextAvailableMinute,scheduledRuns,scheduleConflicts,scheduleAudit,clockString,clockDigits,parseClockDigits,KEYS,EQUIPMENT,DRUM_GREAT,zero,add,clamp,equipmentTotals,getProb,getBonus,shipCost,calcFuelCost,expeditionOutcome,sumPreset,sumMonthly,occupationForRows,formatOccupation,computePlan,makeRow,initial,sample};
+if(typeof module!=='undefined'&&module.exports)module.exports=root.ExpCalc;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<script>
+(()=>{
+'use strict';
+const E=window.ExpCalc;
+const EXP=window.EXPEDITIONS;
+const EXP_MAP=new Map(EXP.map(e=>[e.id,e]));
+const safeStorage=(name)=>{try{return window[name]}catch(e){return {getItem:()=>null,setItem:()=>{}}}};
+const LS=safeStorage('localStorage'), SS=safeStorage('sessionStorage');
+const STORAGE='kc-expedition-planner-v1';
+const SNAP='kc-expedition-planner-snapshots-v1';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const fmt=(v,d=1)=>new Intl.NumberFormat('ja-JP',{maximumFractionDigits:d,minimumFractionDigits:0}).format(v||0);
+const signed=v=>(v>0?'+':'')+fmt(v);
+const one=(selector)=>document.querySelector(selector);
+const setStorage=(key,x,store)=>{try{store.setItem(key,JSON.stringify(x));}catch(e){console.warn('Storage unavailable',e);}};
+const readStorage=(key,store)=>{try{return JSON.parse(store.getItem(key))}catch(e){return null}};
+const blankState=()=>E.initial();
+let state=readStorage(STORAGE,LS);
+if(!state||state.version!==1||!Array.isArray(state.presets))state=blankState();
+let snaps=readStorage(SNAP,SS);if(!Array.isArray(snaps))snaps=[];
+let ui={tab:'plan',period:'monthly',display:'gross',selectedPreset:state.presets[0]?.id||'',selectedFleet:state.fleets[0]?.id||'',expandedRow:'',compareA:'saved0',compareB:'current',importNotice:'',sampleLoaded:false,monthlyMappingOpen:false};
+let importStr='';
+function persist(){setStorage(STORAGE,state,LS)}
+function update(cb,rerender=true){cb();schedulePresets();persist();if(rerender)render();}
+function presetById(id){return state.presets.find(x=>x.id===id)}
+function fleetById(id){return state.fleets.find(x=>String(x.id)===String(id))}
+function options(rows,selected){return rows.map(r=>`<option value="${esc(r.value)}" ${String(r.value)===String(selected)?'selected':''}>${esc(r.label)}</option>`).join('')}
+// Expedition picker: named choices with duration and colored base resource indicators.
+// Using a custom disclosure instead of native <option>, whose rich styling is browser-dependent.
+const RESOURCE_META=[['fuel','燃','燃料'],['ammo','弾','弾薬'],['steel','鋼','鋼材'],['bauxite','ボ','ボーキ']];
+function expeditionDuration(minutes){const h=Math.floor(minutes/60),m=minutes%60;return `${h}:${String(m).padStart(2,'0')}`;}
+function expeditionBadges(exp){
+ return RESOURCE_META.filter(([key])=>Number(exp.rewards?.[key]||0)>0)
+  .map(([key,short,name])=>`<span class="exp-res exp-res-${key}" title="${name} ${fmt(exp.rewards[key],0)}" aria-label="${name} ${fmt(exp.rewards[key],0)}">${short}</span>`).join('');
+}
+function expeditionOption(exp,chosen,attrs){
+ const label=`${exp.id} · ${exp.name}`;
+ return `<button type="button" class="exp-choice ${chosen?'selected':''}" data-action="select-exp" data-value="${esc(exp.id)}" ${attrs} data-search="${esc((exp.id+' '+exp.name).toLowerCase())}" aria-label="${esc(label)}、所要 ${expeditionDuration(exp.minutes)}、獲得資源 ${RESOURCE_META.filter(([key])=>Number(exp.rewards?.[key]||0)>0).map(([, ,name])=>name).join('・')}" ${chosen?'aria-current="true"':''}>
+ <span class="exp-option-title">${esc(label)}</span><span class="exp-option-meta"><span class="exp-resources">${expeditionBadges(exp)}</span><span class="exp-time">${expeditionDuration(exp.minutes)}</span></span>
+ </button>`;
+}
+function expeditionPicker(selected,monthly,attrs){
+ const exp=EXP_MAP.get(selected);
+ const pool=EXP.filter(x=>x.monthly===!!monthly);
+ const title=exp?`${exp.id} · ${exp.name}`:'遠征を選択';
+ return `<div class="field exp-field"><label>遠征</label><details class="exp-picker">
+  <summary class="exp-picker-trigger" aria-label="遠征の選択：${esc(title)}"><span class="exp-option-title">${esc(title)}</span><span class="exp-caret" aria-hidden="true">▾</span>${exp?`<span class="exp-option-meta"><span class="exp-resources">${expeditionBadges(exp)}</span><span class="exp-time">${expeditionDuration(exp.minutes)}</span></span>`:''}</summary>
+  <div class="exp-picker-menu"><div class="exp-picker-search"><input type="search" placeholder="遠征番号・名前で検索" aria-label="遠征を検索" autocomplete="off"></div>
+  <div class="exp-picker-results">${pool.map(x=>expeditionOption(x,x.id===selected,attrs)).join('')}</div>
+  <div class="exp-picker-empty hidden">一致する遠征がありません</div></div></details></div>`;
+}
+function fleetOptions(selected){return options([{value:'',label:'編成なし'},...state.fleets.map(f=>({value:f.id,label:f.name}))],selected)}
+function numberField(label,value,attrs='',cls='narrow'){return `<div class="field ${cls}"><label>${esc(label)}</label><input type="number" value="${esc(value)}" ${attrs}></div>`}
+function selectField(label,items,value,attrs='',cls='medium'){return `<div class="field ${cls}"><label>${esc(label)}</label><select ${attrs}>${options(items,value)}</select></div>`}
+function button(action,label,className='btn',attrs=''){return `<button type="button" class="${className}" data-action="${action}" ${attrs}>${label}</button>`}
+function outcomeSummary(v,count){const vals=['fuel','ammo','steel','bauxite'].map(k=>fmt((v.earned[k]||0)*count,0));return `燃 ${vals[0]} ／ 弾 ${vals[1]} ／ 鋼 ${vals[2]} ／ ボ ${vals[3]}`}
+function renderRow(row,scope,pid){
+ const monthly=scope==='monthly';const exp=EXP_MAP.get(row.expId);if(!exp)return '';
+ const fleet=fleetById(row.fleetId);const v=E.expeditionOutcome(row,exp,state.fleets,state.settings),active=ui.expandedRow===row.id;
+ const attr=`data-scope="${scope}" data-pid="${esc(pid)}" data-rid="${esc(row.id)}"`;
+ const warn=v.prob.warning?`<div class="warning">${esc(v.prob.warning)}</div>`:'';
+ const rateText=`大成功 ${fmt(v.prob.value*100,0)}%（${esc(v.prob.description)}）`;
+ const benefit=`大発補正 +${fmt(v.bonus.percent,2)}%`;
+ const cost=v.costKnown?`補給 燃${fmt(v.cost.fuel)} / 弾${fmt(v.cost.ammo)}`:'補給は未計算';
+ return `<div class="entry"><div class="entry-top">
+ ${expeditionPicker(row.expId,monthly,attr)}
+ ${numberField(monthly?'回数/月':'回数/日',row.count,`data-change="row" data-field="count" min="0" max="${monthly?1:200}" step="1" ${attr}`,'count')}
+ <div class="field medium"><label>使用編成</label><select data-change="row" data-field="fleetId" ${attr}>${fleetOptions(row.fleetId)}</select></div>
+ <div class="entry-actions">${button('expand-row',active?'閉じる':'補正・詳細','btn tiny',`data-rid="${esc(row.id)}"`)} ${button('remove-row','削除','btn tiny danger',attr)}</div></div>
+ <div class="entry-sub"><span class="chip blue">所要 ${E.formatOccupation(exp.minutes)} / 回</span><span>占有 ${E.formatOccupation(exp.minutes*E.clamp(row.count,0,monthly?1:200))}</span><span>${rateText}</span><span>${benefit}</span><span>${cost}</span></div>
+ <div class="entry-sub summaryline">${outcomeSummary(v,E.clamp(row.count,0,monthly?1:200))}</div>
+ ${active?`<div class="entry-advanced"><h3>獲得補正・大成功率</h3><div class="cols-form">
+ ${selectField('大成功率の指定',[{value:'common',label:'共通確率'},{value:'manual',label:'個別指定'},{value:'fleet',label:'編成から推定'}],row.probMode,`data-change="row" data-field="probMode" ${attr}`)}
+ ${numberField('個別大成功率 (%)',row.greatPct,`data-change="row" data-field="greatPct" min="0" max="100" step="1" ${attr} ${row.probMode!=='manual'?'disabled':''}`,'grow')}
+ ${selectField('大発・特大発補正',[{value:'none',label:'補正なし'},{value:'manual',label:'手動補正率'},{value:'fleet',label:'編成の装備から計算'}],row.bonusMode,`data-change="row" data-field="bonusMode" ${attr}`)}
+ ${numberField('手動獲得補正 (%)',row.bonusPct,`data-change="row" data-field="bonusPct" min="0" max="100" step=".1" ${attr} ${row.bonusMode!=='manual'?'disabled':''}`,'grow')}
+ </div><div class="divider"></div><h3>補給消費</h3><div class="cols-form">
+ ${selectField('補給計算',[{value:'fleet',label:'編成の基礎燃費から計算'},{value:'manual',label:'遠征1回の消費量を入力'}],row.costMode,`data-change="row" data-field="costMode" ${attr}`)}
+ ${numberField('手動：燃料消費 / 回',row.costFuel,`data-change="row" data-field="costFuel" min="0" max="5000" step="1" ${attr} ${row.costMode!=='manual'?'disabled':''}`,'grow')}
+ ${numberField('手動：弾薬消費 / 回',row.costAmmo,`data-change="row" data-field="costAmmo" min="0" max="5000" step="1" ${attr} ${row.costMode!=='manual'?'disabled':''}`,'grow')}
+ </div><p class="note">この遠征の補給消費率：燃料${exp.consumptionPct.fuel}%・弾薬${exp.consumptionPct.ammo}%。編成に各艦の最大補給量（ケッコン前）を入力すると消費量を推算します。成功条件は検査していません。</p>
+ ${warn}<div class="mini-grid">${['fuel','ammo','steel','bauxite'].map((k,i)=>`<div class="mini-stat"><span class="smallhead">${['燃料','弾薬','鋼材','ボーキ'][i]}（1回）</span><strong>${fmt(v.earned[k])}</strong><div class="subtle">通常 ${fmt(v.detail[k].normal)} / 大成功 ${fmt(v.detail[k].great)}</div></div>`).join('')}</div></div>`:''}</div>`;
+}
+// Time accounting: sum of mission durations times departures, without scheduling.
+function renderOccupation(preset){
+ const occ=E.occupationForRows(preset.rows,state.fleets,EXP);
+ const active=occ.groups.filter(g=>g.minutes>0);
+ const meter=g=>`<div class="occ-row">
+   <div class="occ-name">${esc(g.name)}${g.assigned?'':' <span class="tag">未割当</span>'}</div>
+   <div class="occ-meter"><div class="occ-fill ${g.assigned&&g.minutes>1440?'over':''}" style="width:${Math.min(100,g.minutes/(g.assigned?1440:4320)*100)}%"></div></div>
+   <div class="occ-value">${E.formatOccupation(g.minutes)}${g.assigned?' / 24時間':''}</div>
+ </div>`;
+ return `<div class="occupation"><div class="row-between"><h3>編成別の占有時間 / 1日</h3><span class="chip ${occ.totalMinutes>4320?'amber':'green'}">合計 ${E.formatOccupation(occ.totalMinutes)} / 72時間</span></div>
+ <div class="occ-meter total-meter"><div class="occ-fill ${occ.totalMinutes>4320?'over':''}" style="width:${Math.min(100,occ.totalMinutes/4320*100)}%"></div></div>
+ ${active.length?active.map(meter).join(''):'<div class="note" style="margin-top:8px">遠征を登録すると、編成別の占有時間が表示されます。</div>'}
+ ${!active.some(g=>!g.assigned)?'<div class="note">編成なし：0時間</div>':''}
+ ${occ.warnings.map(w=>`<div class="warning">${esc(w)}</div>`).join('')}
+ ${occ.unassignedMinutes>0?'<p class="note">「編成なし」も総占有時間に算入しています。個別の24時間上限は編成が未指定のため判定できません。</p>':''}
+ <p class="note">所要時間×実施回数による延べ時間です。補給・入替の時間、実際の出発時刻や同時運用の可否は判定しません。</p>
+ </div>`;
+}
+
+// Timeline is an optional view of the same preset rows. Each row count creates individual departures.
+// A 'slot' is 第2/第3/第4艦隊 (hardware occupancy), not the fleet formation used for earnings.
+function reconcileSchedule(p){
+ if(!p?.scheduleEnabled)return;
+ const rows=p.rows||[];const byId=new Map(rows.map(r=>[r.id,r]));
+ p.schedule=(Array.isArray(p.schedule)?p.schedule:[]).filter(s=>byId.has(s.rowId));
+ for(const row of rows){
+  const expected=Math.round(E.clamp(row.count,0,200));
+  const active=p.schedule.filter(s=>s.rowId===row.id);
+  if(active.length>expected){const remove=new Set(active.slice(expected).map(s=>s.id));p.schedule=p.schedule.filter(s=>!remove.has(s.id));}
+  for(let i=active.length;i<expected;i++)p.schedule.push({id:uid(),rowId:row.id,slot:'',start:null});
+ }
+}
+function schedulePresets(){for(const p of state.presets)reconcileSchedule(p)}
+function scheduleRows(p){return E.scheduledRuns(p,EXP)}
+function scheduleIssue(p,scheduledId,patch){
+ const rows=scheduleRows(p),candidate=rows.find(r=>r.id===scheduledId);
+ if(!candidate)return {hard:[],soft:[]};
+ return E.scheduleConflicts({...candidate,...patch},rows,E.dayStartMinutes(p));
+}
+// Clone one departure and its entire earnings/formation configuration.
+// Copying a run does not modify the original row even when its count is >1.
+function duplicateScheduleDeparture(p,sid){
+ const original=p.schedule?.find(s=>s.id===sid);
+ const row=p.rows.find(r=>r.id===original?.rowId);
+ const expedition=EXP_MAP.get(row?.expId);
+ if(!original||!row||!expedition)return false;
+ const clonedRow=structuredClone(row);
+ clonedRow.id=uid();clonedRow.count=1;
+ const hasStart=original.start!==null&&original.start!==undefined&&original.start!=='';
+ const base=E.dayStartMinutes(p);
+ const originalOffset=Math.max(0,Number(original.dayOffset)||0);
+ const returnMinutes=hasStart?E.dayAbsoluteMinute(original.start,base)+originalOffset*1440+Number(expedition.minutes):null;
+ const availableMinutes=hasStart?E.nextAvailableMinute(p,returnMinutes):null;
+ const newStart=hasStart?((availableMinutes%1440)+1440)%1440:null;
+ // Preserve the operational-day offset when a clone crosses the next day's
+ // baseline. Merely storing HHMM would wrongly move it back to the previous day.
+ const startOffset=hasStart?Math.max(0,Math.round((availableMinutes-E.dayAbsoluteMinute(newStart,base))/1440)):0;
+ const clonedDeparture={id:uid(),rowId:clonedRow.id,slot:original.slot||'',start:newStart,dayOffset:startOffset};
+ // Conflicts and overflow are advisory and remain visible in the schedule audit.
+ p.rows.push(clonedRow);
+ const at=p.schedule.findIndex(s=>s.id===sid);
+ p.schedule.splice(at+1,0,clonedDeparture);
+ return true;
+}
+function scheduleEditExp(p,sid,expId){
+ const entry=p.schedule.find(x=>x.id===sid);if(!entry)return false;
+ const row=p.rows.find(x=>x.id===entry.rowId),exp=EXP_MAP.get(expId);if(!row||!exp||exp.monthly)return false;
+ // Allow changes even when the new duration overlaps or crosses the day boundary.
+ // The resulting warnings will be displayed below the schedule summary.
+ splitScheduleRow(p,entry);
+ p.rows.find(x=>x.id===entry.rowId).expId=expId;
+ return true;
+}
+function splitScheduleRow(p,entry){
+ const row=p.rows.find(x=>x.id===entry.rowId);if(!row||row.count<=1)return;
+ row.count-=1;
+ const next={...structuredClone(row),id:uid(),count:1};p.rows.push(next);entry.rowId=next.id;
+}
+function renderSchedulerTimeline(audit,preset){
+ const base=audit.dayStart;
+ const hours=[0,4,8,12,16,20,24];
+ const unavailableBands=E.unavailableIntervals(preset).map(w=>{
+  const left=Math.max(0,w.start-base),right=Math.min(1440,w.end-base);
+  return right>left?`<div class="timeline-unavailable" style="left:${left/14.4}%;width:${(right-left)/14.4}%" title="触れない時間帯：${esc(E.clockString(w.start))}〜${esc(E.clockString(w.end))}"></div>`:'';
+ }).join('');
+ const bars=(slot)=>{
+  let result=unavailableBands;
+  for(const s of audit.runs.filter(x=>String(x.slot)===String(slot)&&x.start!==null&&x.start!==undefined&&x.start!=='')){
+   const relativeStart=E.dayRelativeMinute(s.start,base)+Math.max(0,Number(s.dayOffset)||0)*1440;
+   const relativeEnd=Math.min(1440,relativeStart+s.duration);
+   const absoluteStart=E.dayAbsoluteMinute(s.start,base)+Math.max(0,Number(s.dayOffset)||0)*1440;
+   const startText=E.clockString(absoluteStart);
+   const endText=E.clockString(absoluteStart+s.duration);
+   const title=`${s.exp.name}  ${startText}〜${endText}  ${s.row.fleetId?(fleetById(s.row.fleetId)?.name||'編成不明'):'編成なし'}`;
+   if(relativeEnd>relativeStart)result+=`<div class="timeline-bar" style="left:${relativeStart/14.4}%;width:${(relativeEnd-relativeStart)/14.4}%" title="${esc(title)}"><span>${esc(s.exp.name)}</span></div>`;
+  }
+  return result;
+ };
+ const startLabel=E.clockString(base),endLabel=E.clockString(base+1440);
+ return `<section class="panel section"><div class="sectionhead"><div><h2>艦隊枠の占有状況</h2><p>1日の範囲：${esc(startLabel)} 〜 ${esc(endLabel)}。左端が基準時刻、右端が翌日の基準時刻です。</p></div></div>
+ <div class="timeline-head"><span></span><div class="timeline-hours">${hours.map(x=>{const t=E.clockString(base+x*60);return `<span title="${esc(t)}">${esc(t.slice(0,5))}</span>`}).join('')}</div></div>
+ ${[2,3,4].map(slot=>`<div class="timeline-row"><div class="timeline-label">第${slot}艦隊</div><div class="timeline-track">${bars(slot)}</div></div>`).join('')}
+ <p class="note">斜線部分は「触れない時間帯」です。遠征複製では、帰投がこの時間帯に重なれば終了時刻まで出発を繰り下げます。艦隊枠の重複や翌日の基準時刻越えは警告しますが、登録・編集は可能です。タイムラインは基準時刻から24時間分を表示します。</p></section>`;
+}
+function renderScheduleEntry(p,s){
+ const exp=s.exp,row=s.row;
+ const attr=`data-pid="${esc(p.id)}" data-sid="${esc(s.id)}"`;
+ const assigned=['2','3','4'].includes(String(s.slot))&&s.start!==null&&s.start!==undefined&&s.start!=='';
+ const base=E.dayStartMinutes(p);
+ const dayOffset=Math.max(0,Number(s.dayOffset)||0);
+ const absoluteStart=assigned?E.dayAbsoluteMinute(s.start,base)+dayOffset*1440:null;
+ const end=assigned?`→ ${E.clockString(absoluteStart+s.duration)}`:'未配置';
+ const startDayNote=dayOffset>0?`<span class="chip amber">翌運用日 +${dayOffset}日 ${button('schedule-reset-offset','基本日に戻す','btn tiny',attr)}</span>`:(assigned&&absoluteStart>=1440?'<span class="chip blue">翌日の出発</span>':'');
+ const issue=assigned?E.scheduleConflicts(s,scheduleRows(p),base):null;
+ return `<div class="schedule-entry ${issue?.hard.length?'schedule-conflict':''}">
+ <div class="schedule-entry-fields">${expeditionPicker(exp.id,false,attr)}
+ ${selectField('艦隊枠',[{value:'',label:'未割当'},{value:'2',label:'第2艦隊'},{value:'3',label:'第3艦隊'},{value:'4',label:'第4艦隊'}],s.slot||'',`data-change="schedule" data-field="slot" ${attr}`,'medium')}
+ <div class="field schedule-clock"><label>開始時刻（4桁）</label><input type="text" inputmode="numeric" pattern="[0-9]{4}" class="schedule-time-input" placeholder="0830" maxlength="4" autocomplete="off" value="${E.clockDigits(s.start)}" data-change="schedule" data-field="start" ${attr}></div>
+ <div class="field schedule-formation"><label>使用編成</label><select data-change="schedule" data-field="formationId" ${attr}>${fleetOptions(row.fleetId)}</select></div>
+ ${button('schedule-duplicate','遠征複製','btn tiny schedule-duplicate',attr)}
+ ${button('schedule-remove','削除','btn tiny danger schedule-remove',attr)}
+ </div>
+ <div class="schedule-entry-note"><span>${esc(expeditionDuration(s.duration))} / 回</span>${startDayNote}<span class="${assigned?'scheduled':'unplaced'}">${esc(end)}</span>${issue?.hard.length?`<span class="warning">要確認：${esc(issue.hard.join(' '))}</span>`:''}</div>
+ </div>`;
+}
+function renderScheduler(){
+ const p=presetById(ui.selectedPreset)||state.presets[0];if(!p)return '<div class="empty">プリセットがありません。</div>';
+ const period=E.computePlan(state,EXP).perPreset[p.id];
+ const dayStart=E.dayStartMinutes(p);
+ const unavailable=Array.isArray(p.unavailablePeriods)?p.unavailablePeriods:[];
+ const unavailableUI=`<section class="schedule-unavailable"><div class="row-between"><div><h3>触れない時間帯</h3><p class="note">出発予定の「遠征複製」時に、帰投がこの時間帯なら終了後に出発を繰り下げます。</p></div>${button('schedule-away-add','＋ 時間帯を追加','btn tiny',`data-pid="${esc(p.id)}"`)}</div>
+ ${unavailable.length?unavailable.map((period,i)=>`<div class="schedule-away-row"><div class="field schedule-clock"><label>開始（4桁）</label><input type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" value="${E.clockDigits(period.start)}" data-change="schedule-away" data-field="start" data-index="${i}" data-pid="${esc(p.id)}" aria-label="触れない時間帯 ${i+1} 開始"></div><span class="away-separator">〜</span><div class="field schedule-clock"><label>終了（4桁）</label><input type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" value="${E.clockDigits(period.end)}" data-change="schedule-away" data-field="end" data-index="${i}" data-pid="${esc(p.id)}" aria-label="触れない時間帯 ${i+1} 終了"></div>${button('schedule-away-remove','削除','btn tiny danger',`data-pid="${esc(p.id)}" data-index="${i}"`)}</div>`).join(''):'<p class="note">未登録：従来どおり帰投直後に複製します。</p>'}
+ <p class="note">例：0900〜1800、2300〜0700。日付をまたぐ設定も可能です。登録済みの出発予定は自動変更しません。</p></section>`;
+ const top=`<section class="panel section"><div class="sectionhead"><div><h2>遠征スケジューラー</h2><p>遠征の回数を、実際の出発時刻と第2〜第4艦隊の枠へ割り当てます。</p></div></div>
+ <div class="preset-list">${state.presets.map(x=>`<button type="button" class="preset-tab ${x.id===p.id?'selected':''}" data-action="choose-preset" data-pid="${esc(x.id)}">${esc(x.name)}<span>${x.rows.reduce((n,r)=>n+E.clamp(r.count,0,200),0)}回 / 日</span></button>`).join('')}</div>
+ <div class="schedule-day-start"><div class="field schedule-clock"><label>1日の基準時刻（4桁）</label><input type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" placeholder="0700" value="${E.clockDigits(dayStart)}" data-change="schedule-base" data-pid="${esc(p.id)}" aria-label="1日の基準時刻（4桁）"></div><div class="note">このプリセットの1日：<strong>${E.clockString(dayStart)} 〜 ${E.clockString(dayStart+1440)}</strong>。超過する予定も登録できますが、警告を表示します。</div></div>
+ ${unavailableUI}
+ <p class="note">スケジューラーは任意機能です。開始時刻は 0830 のように4桁で入力します。基準時刻より前の時刻は翌日の出発です。「遠征複製」は帰投直後、触れない時間帯に重なるときは終了時刻から次の遠征を開始します。出発時刻が未設定でも資源収支は計算できます。</p>
+ ${!p.scheduleEnabled?`<div class="notice">このプリセットの遠征を1回ずつ出発予定へ展開できます。既存の収支設定は変更しません。</div>${button('schedule-enable','このプリセットの予定を作成','btn primary',`data-pid="${esc(p.id)}"`)}`:
+ `<div class="row-wrap">${button('schedule-add','+ 遠征を1回追加','btn primary',`data-pid="${esc(p.id)}"`)}${button('schedule-disable','予定の時刻設定を解除','btn danger',`data-pid="${esc(p.id)}"`)}</div>`}
+ </section>`;
+ if(!p.scheduleEnabled)return `<div class="stack">${top}</div>`;
+ const audit=E.scheduleAudit(p,EXP);
+ const status=`<section class="panel section"><div class="row-between"><div><h2>出発予定</h2><p class="note">合計 ${audit.runs.length}回 · 配置済 ${audit.placed}回 · 未配置 ${audit.missing}回</p></div><span class="chip ${audit.complete?'green':'amber'}">${audit.missing?'未配置・要確認':audit.hard.length?'注意事項あり':'時刻割当完了'}</span></div>
+ <div class="sumstrip"><span><strong>1日分の獲得期待値：</strong>${['fuel','ammo','steel','bauxite'].map((k,i)=>`${['燃','弾','鋼','ボ'][i]} ${fmt(period.earned[k])}`).join(' ／ ')}</span><span class="muted">${E.formatOccupation(period.occupation.totalMinutes)} / 延べ</span></div>
+ <p class="note">この金額は予定が未配置でもプリセット内の全遠征を集計した値です。編成未登録時は補給費を差し引いていません。</p>
+ ${audit.hard.map(x=>`<div class="warning">要確認（登録済み）：${esc(x)}</div>`).join('')}
+ ${audit.soft.map(x=>`<div class="notice">艦娘編成の重複：${esc(x)}</div>`).join('')}
+ ${audit.runs.filter(x=>x.start!==null&&x.start!==undefined&&x.start!==''&&E.nextAvailableMinute(p,E.dayAbsoluteMinute(x.start,dayStart))>E.dayAbsoluteMinute(x.start,dayStart)).map(x=>`<div class="notice">${esc(x.exp.name)}（${esc(E.clockString(E.dayAbsoluteMinute(x.start,dayStart)))}発）は、触れない時間帯に出発する設定です。</div>`).join('')}
+ ${audit.runs.length?audit.runs.map(x=>renderScheduleEntry(p,x)).join(''):'<div class="empty">遠征がありません。＋遠征を1回追加してください。</div>'}
+ </section>`;
+ return `<div class="stack">${top}${renderSchedulerTimeline(audit,p)}${status}</div>`;
+}
+
+function renderMappingGroups(rows,monthly,presetId){
+ const occ=E.occupationForRows(rows,state.fleets,EXP,monthly);
+ const groupDefs=[...state.fleets.map(f=>({id:String(f.id),name:f.name})),{id:'',name:'編成なし'}];
+ return groupDefs.map(g=>{
+   const list=rows.filter(r=>String(r.fleetId||'')===g.id || (g.id===''&&!fleetById(r.fleetId)));
+   const group=occ.groups.find(x=>x.id===g.id);
+   const attrs=`data-pid="${esc(presetId)}" data-fid="${esc(g.id)}"`;
+   const act=monthly?'add-monthly-for-fleet':'add-row-for-fleet';
+   return `<section class="fleet-map-group"><div class="row-between map-group-head"><div><h3>${esc(g.name)}</h3><p class="note">${list.length}種類・${fmt(group?.runs||0,0)}回${monthly?'/月':'/日'} / 占有 ${E.formatOccupation(group?.minutes||0)}</p></div>${button(act,'+ この編成に遠征を追加','btn tiny',attrs)}</div>
+   ${list.length?list.map(r=>renderRow(r,monthly?'monthly':'preset',presetId)).join(''):'<p class="note map-empty">割当なし</p>'}</section>`;
+ }).join('');
+}
+function renderFleetMapping(){
+ const preset=presetById(ui.selectedPreset)||state.presets[0];
+ if(!preset)return '<div class="empty">プリセットがありません。</div>';
+ return `<div class="stack"><section class="panel section"><div class="sectionhead"><div><h2>編成別の遠征割当</h2><p>艦隊を起点に遠征を登録・編集します。「運用プリセット」と同じデータを操作します。</p></div></div>
+ <div class="preset-list">${state.presets.map(p=>`<button type="button" class="preset-tab ${p.id===preset.id?'selected':''}" data-action="choose-preset" data-pid="${esc(p.id)}">${esc(p.name)}<span>${p.rows.length}種類の遠征</span></button>`).join('')}</div>
+ ${renderOccupation(preset)}
+ <div class="map-groups">${renderMappingGroups(preset.rows,false,preset.id)}</div>
+ <p class="note">この画面で遠征・回数・使用編成を変えると「運用プリセット」画面にも反映されます。編成なしでも遠征を登録できます。</p>
+ </section><section class="panel section"><details ${ui.monthlyMappingOpen?'open':''}><summary class="map-monthly-summary">月次遠征を編成別に編集（${state.monthlyRows.length}件）</summary><p class="note">月次遠征は月1回の実施とし、日次プリセットの72時間の判定には加えません。</p>
+ ${renderMappingGroups(state.monthlyRows,true,'')}
+ </details></section></div>`;
+}
+function renderOverview(){
+ const plan=E.computePlan(state,EXP),o=plan[ui.period],hasNet=o.runs>0&&o.unestimated<.00001;
+ if(ui.display==='net'&&!hasNet)ui.display='gross';
+ const annual=ui.period==='weekly'?'週間':ui.period==='monthly'?'月間':'年間';
+ const colors=['#52a9c9','#eca75d','#98acbf','#79b998'];
+ const cards=['fuel','ammo','steel','bauxite'].map((key,i)=>{const val=ui.display==='net'?o.earned[key]-o.cost[key]:o.earned[key];return `<div class="res"><div class="label"><i class="symbol" style="background:${colors[i]}"></i>${['燃料','弾薬','鋼材','ボーキ'][i]}</div><div class="num">${fmt(val)}</div><div class="minor">${ui.display==='net'?'期待純収支':'期待獲得量'}</div></div>`}).join('');
+ const warnings=plan.warnings.map(x=>`<div class="warning">${esc(x)}</div>`).join('');
+ return `<section class="panel summary"><div class="shead"><div><div class="eyebrow" style="color:#6790a7">RESOURCE OVERVIEW</div><h2 style="margin-top:4px">${annual}の資源見込み</h2></div><div class="row-wrap"><div class="segment" role="tablist">${[['weekly','週間'],['monthly','月間'],['yearly','年間']].map(([id,label])=>`<button type="button" data-action="period" data-period="${id}" class="${ui.period===id?'active':''}">${label}</button>`).join('')}</div><div class="segment"><button type="button" data-action="display" data-display="gross" class="${ui.display==='gross'?'active':''}">獲得量</button><button type="button" data-action="display" data-display="net" class="${ui.display==='net'?'active':''}" ${!hasNet?'disabled title="すべての補給費を設定すると表示できます"':''}>純収支</button></div></div></div>
+ <div class="resource-grid">${cards}</div><div class="resource-foot"><span><span class="dot"></span>遠征 ${fmt(o.runs)} 回／${annual} ${o.unestimated>0?` · 補給未計算 ${fmt(o.unestimated)} 回`:''}</span><span>延べ占有 ${fmt((o.minutes||0)/60)} 時間／${annual} · 大成功率を適用・失敗率0%仮定</span></div>
+ <details style="margin-top:12px"><summary class="note" style="cursor:pointer">補給費・その他の獲得物を見る</summary><div class="mini-grid" style="margin-top:10px">${[['燃料消費（計算可能分）',o.cost.fuel],['弾薬消費（計算可能分）',o.cost.ammo],['ネジ（大成功限定）',o.earned['ネジ']],['平均遠征回数',o.runs]].map(([name,value])=>`<div class="mini-stat"><div class="smallhead">${name}</div><strong>${fmt(value)}</strong></div>`).join('')}</div><p class="note">ランダム報酬（バケツ・釘など）は確率データ未登録のため集計対象外です。交戦型遠征の修理費・キラ付け費用も含みません。</p></details>
+ ${warnings}${o.unestimated>0?'<div class="notice" style="margin-top:11px">補給費が未設定の遠征があります。現在の資源カードは「獲得量」であり、純増量ではありません。</div>':''}</section>`;
+}
+function renderPlan(){
+ const plan=E.computePlan(state,EXP);const preset=presetById(ui.selectedPreset)||state.presets[0];if(!preset) return '<div class="empty">プリセットがありません。</div>';
+ const dayRows=(state.weekly||[]).map((a,i)=>`<div class="day-row"><select data-change="weekly" data-index="${i}" data-field="presetId">${options(state.presets.map(x=>({value:x.id,label:x.name})),a.presetId)}</select><input type="number" min="0" max="7" step="1" data-change="weekly" data-index="${i}" data-field="days" value="${a.days}" title="日数"><button class="btn tiny danger" data-action="remove-week" data-index="${i}">削除</button></div>`).join('');
+ const exRows=(state.exceptions||[]).map((x,i)=>`<div class="exception-row"><input type="text" value="${esc(x.name)}" data-change="exception" data-index="${i}" data-field="name" aria-label="例外名"><select data-change="exception" data-index="${i}" data-field="presetId" title="置換後">${options(state.presets.map(p=>({value:p.id,label:'適用：'+p.name})),x.presetId)}</select><select data-change="exception" data-index="${i}" data-field="replaceId" title="置換元">${options(state.presets.map(p=>({value:p.id,label:'置換元：'+p.name})),x.replaceId)}</select><input type="number" min="0" max="31" step="1" title="月あたり日数" value="${x.count}" data-change="exception" data-index="${i}" data-field="count"><button class="btn tiny danger" data-action="remove-exception" data-index="${i}">削除</button></div>`).join('');
+ const sum=plan.perPreset[preset.id];
+ return `<div class="stack"><div class="two-col"><section class="panel section"><div class="sectionhead"><div><h2>週間の基本運用</h2><p>各プリセットを1週間に何日使うかだけ指定</p></div>${button('add-week','+ 割当を追加')}</div>${dayRows||'<div class="empty">割当がありません</div>'}<div class="row-between" style="margin-top:12px"><div class="strong">合計 ${fmt(plan.allocDays,0)} / 7日</div><span class="note">7日になるのが目安</span></div><div class="bar"><div class="used" style="width:${Math.min(100,plan.allocDays/7*100)}%"></div></div></section>
+ <section class="panel section"><div class="sectionhead"><div><h2>月単位の例外</h2><p>メンテなどは通常日を置き換えて計算</p></div>${button('add-exception','+ 例外を追加')}</div>${exRows||'<div class="empty">例外なし。必要なら追加できます。</div>'}<p class="note">月1回メンテ用プリセットを使う場合、置換元を普段の平日用プリセットにして「1日」と設定します。元の日数より多く置換できません。</p></section></div>
+ <section class="panel section"><div class="sectionhead"><div><h2>遠征プリセット</h2><p>名前は自由。遠征と1日あたりの回数を入力してください。</p></div><div class="row-wrap">${button('add-preset','+ 新規プリセット','btn primary')}${button('clone-preset','複製')}</div></div>
+ ${state.presets.every(p=>!p.rows.length)&&!state.monthlyRows.length?`<div class="notice" style="margin-bottom:12px">最初は「+ 遠征を追加」から始めます。操作を試す場合は ${button('load-sample','サンプル運用を読み込む','btn tiny')} も利用できます。</div>`:''}
+ <div class="preset-list">${state.presets.map(p=>`<button type="button" class="preset-tab ${p.id===preset.id?'selected':''}" data-action="choose-preset" data-pid="${esc(p.id)}">${esc(p.name)}<span>${p.rows.length}種類の遠征</span></button>`).join('')}</div>
+ <div class="row-wrap" style="margin-bottom:13px"><div class="field grow"><label>プリセット名</label><input type="text" data-change="preset-name" data-pid="${esc(preset.id)}" value="${esc(preset.name)}" maxlength="50"></div>${button('remove-preset','このプリセットを削除','btn danger','data-pid="'+esc(preset.id)+'"')}</div>
+ ${preset.rows.length?preset.rows.map(r=>renderRow(r,'preset',preset.id)).join(''):'<div class="empty">まだ遠征が登録されていません。「遠征を追加」から登録します。</div>'}
+ <div class="row-wrap">${button('add-row','+ 遠征を追加','btn primary',`data-pid="${esc(preset.id)}"`)}</div>
+ <div class="sumstrip"><span><strong>1日の報酬：</strong>${['fuel','ammo','steel','bauxite'].map((k,i)=>`${['燃','弾','鋼','ボ'][i]} ${fmt(sum.earned[k])}`).join(' ／ ')}</span><span class="muted">${fmt(sum.runs,0)}回 / 日</span></div>
+ ${renderOccupation(preset)}</section>
+ <section class="panel section"><div class="sectionhead"><div><h2>月1回の遠征</h2><p>月次遠征は1日プリセットと別に登録し、月・年の収支へ加算します。</p></div>${button('add-monthly','+ 月次遠征を追加')}</div>
+ ${state.monthlyRows.length?state.monthlyRows.map(r=>renderRow(r,'monthly','')).join(''):'<div class="empty">月次遠征の登録は任意です。</div>'}
+ <div class="notice" style="margin-top:12px">マンスリー遠征の更新は毎月15日正午です。この計算器は「毎月1回達成する」とみなして平均計算します。出現条件や遠征の成功可否は自動判定しません。</div></section></div>`;
+}
+function renderFleet(){
+ const f=fleetById(ui.selectedFleet)||state.fleets[0];if(!f)return `<section class="panel section"><div class="sectionhead"><div><h2>艦隊編成</h2><p>編成なしでも獲得量は計算できます。登録すると大成功率・大発補正・補給費を計算できます。</p></div>${button('add-fleet','+ 編成を作成','btn primary')}</div><div class="empty">まだ編成がありません。手動で作るか、デッキビルダー形式をインポートできます。</div>${renderImport()}</section>`;
+ const b=E.equipmentTotals(f);
+ return `<div class="stack"><section class="panel section"><div class="sectionhead"><div><h2>艦隊編成</h2><p>編成名を付けて遠征行に割り当てます。編成IDを保持するため名前を変えても参照は維持されます。</p></div><div class="row-wrap">${button('add-fleet','+ 新規編成','btn primary')}${button('remove-fleet','この編成を削除','btn danger')}</div></div>
+ <div class="preset-list">${state.fleets.map(x=>`<button class="preset-tab ${x.id===f.id?'selected':''}" data-action="choose-fleet" data-fid="${esc(x.id)}">${esc(x.name)}<span>${(x.ships||[]).length}隻</span></button>`).join('')}</div>
+ <div class="row-wrap"><div class="field grow"><label>編成名</label><input type="text" value="${esc(f.name)}" data-change="fleet-name" data-fid="${esc(f.id)}"></div></div>
+ <div class="divider"></div><h3>所属艦娘</h3><p class="note">燃料・弾薬は「ケッコン前の満タン補給量」です。デッキビルダーの編成データに燃費・キラ状態は通常含まれないため、インポート後に補完してください。</p>
+ ${(f.ships||[]).map((s,i)=>`<div class="fleetship"><div class="field"><label>艦名</label><input type="text" value="${esc(s.name)}" data-change="ship" data-fid="${esc(f.id)}" data-index="${i}" data-field="name" title="艦娘ID ${esc(s.shipId||'未設定')}"></div>
+ ${numberField('Lv',s.level??1,`data-change="ship" data-fid="${esc(f.id)}" data-index="${i}" data-field="level" min="1" max="200" step="1"`,'')}
+ ${numberField('燃料',s.fuel??'',`data-change="ship" data-fid="${esc(f.id)}" data-index="${i}" data-field="fuel" min="0" step="1" placeholder="未設定"`,'')}
+ ${numberField('弾薬',s.ammo??'',`data-change="ship" data-fid="${esc(f.id)}" data-index="${i}" data-field="ammo" min="0" step="1" placeholder="未設定"`,'')}
+ <label class="check-field"><input type="checkbox" data-change="ship-check" data-fid="${esc(f.id)}" data-index="${i}" data-field="married" ${s.married?'checked':''}> ケッコン</label>
+ <label class="check-field"><input type="checkbox" data-change="ship-check" data-fid="${esc(f.id)}" data-index="${i}" data-field="kira" ${s.kira?'checked':''}> キラ</label>
+ <label class="check-field"><input type="checkbox" data-change="ship-check" data-fid="${esc(f.id)}" data-index="${i}" data-field="kinu" ${s.kinu?'checked':''}> 鬼怒改二</label>
+ ${button('remove-ship','×','btn tiny danger',`data-fid="${esc(f.id)}" data-index="${i}"`)}
+ ${(s.items||[]).length?`<div class="subtle" style="grid-column:1/-1">読込装備：${(s.items||[]).map(x=>{const e=E.EQUIPMENT[Number(x.id)];return esc((e?e.name:'装備ID '+x.id)+(x.rf?' ★'+x.rf:''))}).join(' / ')}</div>`:''}</div>`).join('')}
+ <div class="row-wrap" style="margin-top:12px">${button('add-ship','+ 艦娘を追加','btn')}</div>
+ </section><section class="panel section"><div class="sectionhead"><div><h2>輸送装備（補正の自動計算）</h2><p>インポート済み装備に加え、手動登録分を加算できます。</p></div><span class="chip green">現在 +${fmt(b.percent,2)}%</span></div>
+ <div class="mini-grid">${[['daihatsu','大発（★指定共通）'],['tokudai','特大発'],['tank','陸戦隊'],['katsu','特二式内火艇'],['armed','武装大発'],['drum','ドラム缶'],['star','手動装備の★平均']].map(([key,label])=>numberField(label,f.extraEquipment?.[key]||0,`data-change="equipment" data-fid="${esc(f.id)}" data-field="${key}" min="0" max="${key==='star'?10:30}" step="1"`,'grow')).join('')}</div>
+ <p class="note">特大発の別枠上限、大発系の基本20%上限、改修補正、鬼怒改二固有+5%に対応しています。一部の特殊大発は装備IDが未登録のため、必要に応じて遠征行ごとの「手動補正率」を利用してください。</p>
+ <div class="notice">読み込んだ装備のうち、補正計算に使用するID：68 大発 / 193 特大発 / 166 陸戦隊 / 167 内火艇 / 408 AB艇 / 409 武装大発 / 75 ドラム缶。</div></section>${renderImport()}</div>`;
+}
+function renderImport(){return `<section class="panel section"><div class="sectionhead"><div><h2>制空権シミュレータからインポート</h2><p>「共有」→デッキビルダー形式のJSONをコピーして貼り付けます。</p></div></div><textarea id="deck-text" placeholder='{"version":4,"f1":{"s1":{"id":"487","lv":99,"items":{"i1":{"id":68,"rf":10}}}}}'></textarea><div class="row-wrap" style="margin-top:10px">${button('import-deck','デッキビルダーJSONを読み込む','btn primary')}</div><p class="note">f1〜f4の各艦隊を別々の編成として登録します。艦娘ID・Lv・装備ID・改修値を取り込みます。艦名は艦娘IDで仮登録し、補給量・キラ状態は手動設定です。ネットへの送信はありません。</p><div id="import-status">${ui.importNotice?`<div class="notice">${esc(ui.importNotice)}</div>`:''}</div></section>`}
+function renderCompare(){
+ const all=[{value:'current',label:'編集中の現在条件'},...snaps.map(x=>({value:x.id,label:x.name}))];
+ if(!snaps.some(x=>x.id===ui.compareA))ui.compareA=snaps[0]?.id||'current';
+ if(!snaps.some(x=>x.id===ui.compareB))ui.compareB='current';
+ const get=(id)=>id==='current'?state:snaps.find(x=>x.id===id)?.data||state;
+ const a=E.computePlan(get(ui.compareA),EXP),b=E.computePlan(get(ui.compareB),EXP);
+ const months=['weekly','monthly','yearly'];const t=ui.period;const ea=a[t],eb=b[t];
+ return `<div class="stack"><section class="panel section"><div class="sectionhead"><div><h2>条件の一時保存と比較</h2><p>編成・プリセット・適用日数を含めて最大8件保持。同じタブ内だけの一時保存です。</p></div>${button('save-snapshot','+ 現在条件を保存','btn primary')}</div>
+ ${snaps.length?`<table class="monthtable"><thead><tr><th>保存済み条件</th><th>操作</th></tr></thead><tbody>${snaps.map(s=>`<tr><td><span class="strong">${esc(s.name)}</span><span class="subtle"> · ${esc(s.savedAt)}</span></td><td><div class="row-wrap" style="justify-content:flex-end">${button('restore-snapshot','復元','btn tiny',`data-sid="${esc(s.id)}"`)}${button('delete-snapshot','削除','btn tiny danger',`data-sid="${esc(s.id)}"`)}</div></td></tr>`).join('')}</tbody></table>`:'<div class="empty">まだ保存した比較条件はありません。</div>'}
+ <div class="compare-grid" style="margin-top:17px"><div class="field"><label>比較元 A</label><select data-change="compareA">${options(all,ui.compareA)}</select></div><div class="field"><label>比較先 B</label><select data-change="compareB">${options(all,ui.compareB)}</select></div></div>
+ <p class="note">差分は B − A で表示します。週間は基本運用、月間・年間は例外と月次遠征も含めます。</p>
+ <div style="overflow-x:auto"><table class="difftable"><thead><tr><th>項目（${{weekly:'週間',monthly:'月間',yearly:'年間'}[t]}）</th><th>条件 A</th><th>条件 B</th><th>差分 B−A</th></tr></thead><tbody>
+ ${[['fuel','燃料'],['ammo','弾薬'],['steel','鋼材'],['bauxite','ボーキ'],['ネジ','ネジ（期待値）']].map(([key,label])=>{const d=eb.earned[key]-ea.earned[key];return `<tr><td>${label}</td><td>${fmt(ea.earned[key])}</td><td>${fmt(eb.earned[key])}</td><td class="${d>0?'positive':d<0?'negative':''}">${signed(d)}</td></tr>`}).join('')}
+ <tr><td>遠征回数</td><td>${fmt(ea.runs)}</td><td>${fmt(eb.runs)}</td><td class="${eb.runs-ea.runs>0?'positive':eb.runs-ea.runs<0?'negative':''}">${signed(eb.runs-ea.runs)}</td></tr>
+ <tr><td>延べ占有時間</td><td>${fmt(ea.minutes/60)} 時間</td><td>${fmt(eb.minutes/60)} 時間</td><td>${signed((eb.minutes-ea.minutes)/60)} 時間</td></tr>
+ <tr><td>純収支（燃料）</td><td>${ea.unestimated?'未計算':fmt(ea.earned.fuel-ea.cost.fuel)}</td><td>${eb.unestimated?'未計算':fmt(eb.earned.fuel-eb.cost.fuel)}</td><td>${ea.unestimated||eb.unestimated?'—':signed((eb.earned.fuel-eb.cost.fuel)-(ea.earned.fuel-ea.cost.fuel))}</td></tr>
+ <tr><td>純収支（弾薬）</td><td>${ea.unestimated?'未計算':fmt(ea.earned.ammo-ea.cost.ammo)}</td><td>${eb.unestimated?'未計算':fmt(eb.earned.ammo-eb.cost.ammo)}</td><td>${ea.unestimated||eb.unestimated?'—':signed((eb.earned.ammo-eb.cost.ammo)-(ea.earned.ammo-ea.cost.ammo))}</td></tr>
+ </tbody></table></div></section>
+ <section class="panel section"><h2>データのバックアップ</h2><p class="note">通常設定はこのブラウザに自動保存されます。長期保管・別端末への移行にはJSONを使用してください。</p><div class="row-wrap">${button('export-json','設定JSONをエクスポート','btn primary')}${button('import-json','設定JSONをインポート')}<input type="file" id="json-file" accept="application/json,.json" class="hidden"></div><div class="divider"></div><h3>サンプルデータ・初期化</h3><div class="row-wrap">${button('load-sample','サンプル運用を読み込む')}${button('reset-all','初期化','btn danger')}</div><p class="note">初期化すると現在の設定が消えます。比較用スナップショットは別に保持されます。</p></section></div>`;
+}
+function render(){
+ const main=one('#app');
+ const plan=E.computePlan(state,EXP);
+ main.innerHTML=`<div class="top"><div class="container"><div class="toprow"><div><div class="brand"><div class="mark">≋</div><div><div class="eyebrow">KAN-COLLE / EXPEDITION ANALYTICS</div><h1>遠征収支シミュレータ <span class="tag">v1.6</span></h1></div></div><p class="subtitle">いつもの遠征運用を、週・月・年の資源収支に。</p></div><div class="topactions">${button('save-snapshot','条件を一時保存','btn light')}${button('export-json','JSON保存','btn light')}</div></div></div></div>
+ <main class="container shell">${renderOverview()}<nav class="nav" aria-label="画面切り替え">${[['plan','運用プリセット'],['scheduler','スケジューラー'],['mapping','編成別遠征'],['fleet','艦隊・装備'],['compare','条件比較・保存']].map(([id,label])=>`<button type="button" data-action="tab" data-tab="${id}" class="${ui.tab===id?'active':''}">${label}</button>`).join('')}</nav>
+ <div class="content">${ui.tab==='plan'?renderPlan():ui.tab==='scheduler'?renderScheduler():ui.tab==='mapping'?renderFleetMapping():ui.tab==='fleet'?renderFleet():renderCompare()}</div>
+ <footer class="footer footnotes">非公式ファンツール。艦これの運営元・攻略Wikiとは無関係です。計算は成功率100%を前提とする期待値で、キラ維持の手間・交戦遠征の修理費・ランダム獲得アイテムは算出していません。月間は365÷7÷12週換算です。<br>遠征データ・消費率：<a target="_blank" rel="noopener noreferrer" href="https://wikiwiki.jp/kancolle/%E9%81%A0%E5%BE%81">艦これ攻略Wiki（遠征）</a> / <a target="_blank" rel="noopener noreferrer" href="https://kouryakulab.com/ja/games/kancolle/expedition-requirements/">遠征一覧</a>。大発補正：<a href="https://wikiwiki.jp/kancolle/%E7%89%B9%E5%A4%A7%E7%99%BA%E5%8B%95%E8%89%87" rel="noopener noreferrer" target="_blank">特大発動艇</a>。</footer></main>`;
+}
+function findRow(el){const ds=el.dataset;const arr=ds.scope==='monthly'?state.monthlyRows:presetById(ds.pid)?.rows;return {arr,row:arr?.find(x=>x.id===ds.rid)};}
+function removeFleetRefs(id){for(const p of state.presets)for(const row of p.rows)if(row.fleetId===id)row.fleetId='';for(const row of state.monthlyRows)if(row.fleetId===id)row.fleetId='';}
+function addFleet(){const f={id:uid(),name:`編成${state.fleets.length+1}`,ships:[],extraEquipment:{}};state.fleets.push(f);ui.selectedFleet=f.id;}
+function newShip(){return {id:uid(),shipId:'',name:'艦娘',level:99,married:false,kira:false,kinu:false,fuel:null,ammo:null,items:[]}}
+function handleClick(e){
+ const selectedPicker=e.target.closest('.exp-picker');
+ // Only one picker may be open; outside click closes the menu without changing data.
+ for(const picker of document.querySelectorAll('.exp-picker[open]'))if(picker!==selectedPicker)picker.open=false;
+ if(e.target.closest('.exp-picker-trigger')){
+  const picker=e.target.closest('.exp-picker');
+  if(!picker.open)setTimeout(()=>{if(picker.open)picker.querySelector('.exp-picker-search input')?.focus();},0);
+ }
+ if(e.target.closest('.map-monthly-summary')){ui.monthlyMappingOpen=!ui.monthlyMappingOpen;return;}
+ const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action,d=b.dataset;
+ if(a==='select-exp'){
+  if(d.sid){const p=presetById(d.pid);if(p&&!scheduleEditExp(p,d.sid,d.value))return;update(()=>{});return;}
+  update(()=>{const {row}=findRow(b);if(row)row.expId=d.value;});
+  return;
+ }
+ if(a==='period'){ui.period=d.period;render();return}
+ if(a==='display'){ui.display=d.display;render();return}
+ if(a==='tab'){ui.tab=d.tab;render();return}
+ if(a==='choose-preset'){ui.selectedPreset=d.pid;ui.expandedRow='';render();return}
+ if(a==='choose-fleet'){ui.selectedFleet=d.fid;render();return}
+ if(a==='expand-row'){ui.expandedRow=ui.expandedRow===d.rid?'':d.rid;render();return}
+ if(a==='export-json'){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='kancolle-expedition-settings.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);return}
+ if(a==='import-json'){const file=one('#json-file');if(!file){ui.tab='compare';render();one('#json-file').click();}else file.click();return}
+ if(a==='import-deck'){const raw=one('#deck-text')?.value.trim();if(!raw){alert('デッキビルダー形式のJSONを貼り付けてください。');return}
+   try{const imported=parseDeck(raw);if(!imported.length)throw Error('f1〜f4 に艦娘が見つかりません');update(()=>{state.fleets.push(...imported);ui.selectedFleet=imported[0].id;ui.importNotice=`${imported.length}編成を読み込みました。`});}catch(err){alert('読み込み失敗：'+err.message)}return;}
+ if(a==='save-snapshot'){const name=prompt('保存する条件名',`条件 ${snaps.length+1}`);if(name===null)return;
+   if(snaps.length>=8){alert('一時保存は最大8件です。不要な条件を削除してください。');return;}
+   snaps.push({id:uid(),name:name.trim()||`条件 ${snaps.length+1}`,savedAt:new Date().toLocaleString('ja-JP'),data:structuredClone(state)});setStorage(SNAP,snaps,SS);ui.compareA=snaps[snaps.length-1].id;ui.compareB='current';ui.tab='compare';render();return}
+ if(a==='restore-snapshot'){const s=snaps.find(s=>s.id===d.sid);if(s&&confirm(`「${s.name}」を現在の設定に復元しますか？`))update(()=>{state=structuredClone(s.data);ui.selectedPreset=state.presets[0]?.id||'';ui.selectedFleet=state.fleets[0]?.id||'';});return}
+ if(a==='delete-snapshot'){snaps=snaps.filter(s=>s.id!==d.sid);setStorage(SNAP,snaps,SS);render();return}
+ if(a==='reset-all'){if(confirm('現在の設定を初期化しますか？（元に戻せません）'))update(()=>{state=blankState();ui.selectedPreset='p1';ui.selectedFleet='';ui.expandedRow='';});return}
+ if(a==='load-sample'){if(confirm('サンプル運用で現在の設定を上書きしますか？'))update(()=>{state=E.sample();ui.selectedPreset='p1';ui.selectedFleet='';ui.expandedRow='';ui.tab='plan';});return}
+ if(a==='schedule-enable'){update(()=>{const p=presetById(d.pid);if(p){p.scheduleEnabled=true;p.schedule=[];}});return}
+ if(a==='schedule-disable'){if(!confirm('このプリセットの時刻と艦隊枠の割当を解除しますか？　遠征と回数は残ります。'))return;update(()=>{const p=presetById(d.pid);if(p){p.scheduleEnabled=false;p.schedule=[];}});return}
+ if(a==='schedule-add'){update(()=>{const p=presetById(d.pid);if(!p)return;p.rows.push(E.makeRow('05'));});return}
+ if(a==='schedule-away-add'){
+  update(()=>{const p=presetById(d.pid);if(p){p.unavailablePeriods??=[];p.unavailablePeriods.push({start:540,end:1080});}});return;
+ }
+ if(a==='schedule-away-remove'){
+  update(()=>{const p=presetById(d.pid);if(p&&Array.isArray(p.unavailablePeriods))p.unavailablePeriods.splice(Number(d.index),1);});return;
+ }
+ if(a==='schedule-duplicate'){
+  const p=presetById(d.pid);
+  if(p&&duplicateScheduleDeparture(p,d.sid))update(()=>{});
+  return;
+ }
+ if(a==='schedule-reset-offset'){update(()=>{const p=presetById(d.pid);const entry=p?.schedule?.find(x=>x.id===d.sid);if(entry)entry.dayOffset=0;});return}
+ if(a==='schedule-remove'){update(()=>{const p=presetById(d.pid);if(!p)return;const s=p.schedule?.find(x=>x.id===d.sid);if(!s)return;const r=p.rows.find(x=>x.id===s.rowId);p.schedule=p.schedule.filter(x=>x.id!==s.id);if(r){r.count=Math.max(0,r.count-1);if(r.count===0)p.rows=p.rows.filter(x=>x.id!==r.id);}});return}
+ update(()=>{
+  if(a==='add-preset'||a==='clone-preset'){
+   const current=presetById(ui.selectedPreset);const p=a==='clone-preset'&&current?structuredClone(current):{id:'',name:`プリセット${state.presets.length+1}`,dayStart:0,rows:[]};p.id=uid();if(a==='clone-preset'){p.name+=' のコピー';{const remap=new Map();p.rows.forEach(r=>{const old=r.id;r.id=uid();remap.set(old,r.id)});if(p.schedule)p.schedule.forEach(s=>{s.id=uid();s.rowId=remap.get(s.rowId)||s.rowId});}}state.presets.push(p);ui.selectedPreset=p.id;
+  }else if(a==='remove-preset'){
+   if(state.presets.length<=1){alert('最低1つのプリセットは必要です。');return}
+   if(!confirm('プリセットを削除しますか？週間割当や月間例外の参照も削除します。'))return;
+   state.presets=state.presets.filter(p=>p.id!==d.pid);state.weekly=state.weekly.filter(x=>x.presetId!==d.pid);state.exceptions=state.exceptions.filter(x=>x.presetId!==d.pid&&x.replaceId!==d.pid);ui.selectedPreset=state.presets[0].id;
+  }else if(a==='add-row'){const p=presetById(d.pid);p?.rows.push(E.makeRow('05'));}
+  else if(a==='add-row-for-fleet'){
+   const p=presetById(d.pid);if(p){const row=E.makeRow('05');row.fleetId=d.fid||'';if(row.fleetId){row.probMode='fleet';row.bonusMode='fleet'}p.rows.push(row);}
+  }
+  else if(a==='add-monthly')state.monthlyRows.push(E.makeRow('A4'));
+  else if(a==='add-monthly-for-fleet'){
+   const row=E.makeRow('A4');row.fleetId=d.fid||'';if(row.fleetId){row.probMode='fleet';row.bonusMode='fleet'}state.monthlyRows.push(row);
+  }
+  else if(a==='remove-row'){const {arr}=findRow(b);if(arr)arr.splice(arr.findIndex(x=>x.id===d.rid),1);ui.expandedRow='';}
+  else if(a==='add-week')state.weekly.push({presetId:state.presets[0]?.id||'',days:0});
+  else if(a==='remove-week')state.weekly.splice(Number(d.index),1);
+  else if(a==='add-exception')state.exceptions.push({id:uid(),name:'例外運用',presetId:state.presets[1]?.id||state.presets[0]?.id,replaceId:state.presets[0]?.id,count:1});
+  else if(a==='remove-exception')state.exceptions.splice(Number(d.index),1);
+  else if(a==='add-fleet')addFleet();
+  else if(a==='remove-fleet'){const f=fleetById(ui.selectedFleet);if(f&&confirm(`${f.name}を削除しますか？`)){state.fleets=state.fleets.filter(x=>x.id!==f.id);removeFleetRefs(f.id);ui.selectedFleet=state.fleets[0]?.id||''}}
+  else if(a==='add-ship'){const f=fleetById(ui.selectedFleet);if(f){if(f.ships.length>=7){alert('1編成には最大7隻です。');return;}f.ships.push(newShip())}}
+  else if(a==='remove-ship'){const f=fleetById(d.fid);f?.ships.splice(Number(d.index),1)}
+ });
+}
+function handleChange(e){const t=e.target,d=t.dataset,type=d.change;if(!type)return;
+ if(type==='compareA'||type==='compareB'){ui[type]=t.value;render();return}
+ if(type==='schedule-away'){
+  const p=presetById(d.pid),period=p?.unavailablePeriods?.[Number(d.index)];
+  if(!period)return;
+  const parsed=E.parseClockDigits(t.value);
+  if(parsed===undefined||parsed===null||parsed===period[d.field==='start'?'end':'start']){
+   alert('触れない時間帯は開始・終了を異なる4桁時刻で指定してください（例：0900〜1800）。');render();return;
+  }
+  update(()=>{period[d.field]=parsed;});return;
+ }
+ if(type==='schedule-base'){
+  const p=presetById(d.pid);
+  if(!p)return;
+  const parsed=E.parseClockDigits(t.value);
+  if(parsed===undefined||parsed===null){alert('1日の基準時刻は 0000〜2359 の4桁数字で入力してください（例：0700）。');render();return;}
+  // Day-boundary conflicts are advisory: keep the edited value and show warnings.
+  update(()=>{p.dayStart=parsed;});return;
+ }
+ if(type==='schedule'){
+  const p=presetById(d.pid),entry=p?.schedule?.find(x=>x.id===d.sid),row=p?.rows.find(x=>x.id===entry?.rowId);
+  if(!p||!entry||!row)return;
+  if(d.field==='formationId'){
+   update(()=>{splitScheduleRow(p,entry);const changed=p.rows.find(x=>x.id===entry.rowId);changed.fleetId=t.value;
+     if(t.value){if(changed.probMode==='common')changed.probMode='fleet';if(changed.bonusMode==='none')changed.bonusMode='fleet';}});
+   return;
+  }
+  const parsed=d.field==='start'?E.parseClockDigits(t.value):null;
+  if(d.field==='start'&&parsed===undefined){alert('開始時刻は 0000〜2359 の4桁数字で入力してください（例：0830）。');render();return;}
+  const value=d.field==='start'?parsed:t.value;
+  // Overlap/day-boundary issues are warnings, not blockers.
+  update(()=>{entry[d.field]=value;});return;
+ }
+ update(()=>{
+ const num=new Set(['count','greatPct','bonusPct','costFuel','costAmmo','days','level','fuel','ammo','daihatsu','tokudai','tank','katsu','armed','drum','star']);
+ const v=num.has(d.field)?(t.value===''?null:Number(t.value)):t.value;
+ if(type==='common')state.settings.commonGreatPct=E.clamp(t.value,0,100);
+ else if(type==='row'){const {row}=findRow(t);if(row){const firstFleet=d.field==='fleetId'&&!row.fleetId&&!!v;row[d.field]=v;if(firstFleet){if(row.probMode==='common')row.probMode='fleet';if(row.bonusMode==='none')row.bonusMode='fleet';}if(d.field==='count')row.count=E.clamp(v,0,d.scope==='monthly'?1:200)}}
+ else if(type==='weekly')state.weekly[Number(d.index)][d.field]=d.field==='days'?E.clamp(v,0,7):v;
+ else if(type==='exception')state.exceptions[Number(d.index)][d.field]=d.field==='count'?E.clamp(v,0,31):v;
+ else if(type==='preset-name'){const p=presetById(d.pid);if(p)p.name=t.value.slice(0,50)||'名称未設定'}
+ else if(type==='fleet-name'){const f=fleetById(d.fid);if(f)f.name=t.value.slice(0,50)||'名称未設定'}
+ else if(type==='ship'||type==='ship-check'){const f=fleetById(d.fid),ship=f?.ships[Number(d.index)];if(ship){ship[d.field]=type==='ship-check'?t.checked:v;if(d.field==='level'&&Number(v)>=100&&Number(ship.level)<100)ship.married=true;}}
+ else if(type==='equipment'){const f=fleetById(d.fid);if(f){f.extraEquipment??={};f.extraEquipment[d.field]=E.clamp(v,0,d.field==='star'?10:30);}}
+ });
+}
+function parseDeck(raw){
+ let json=JSON.parse(raw);
+ if(json.data&&typeof json.data==='object')json=json.data;
+ let result=[];
+ for(let fi=1;fi<=4;fi++){
+  const group=json[`f${fi}`];if(!group||typeof group!=='object')continue;
+  let ships=[];
+  for(let si=1;si<=7;si++){
+   const s=group[`s${si}`];if(!s||!s.id||String(s.id)==='0')continue;
+   const items=Object.values(s.items||{}).filter(x=>x&&x.id&&Number(x.id)>0).map(x=>({id:Number(x.id),rf:Number(x.rf||0)}));
+   const level=Number(s.lv||1);
+   ships.push({id:uid(),shipId:String(s.id),name:`艦娘ID ${s.id}`,level,married:level>=100,kira:false,kinu:false,fuel:null,ammo:null,items});
+  }
+  if(ships.length)result.push({id:uid(),name:`インポート艦隊${fi}`,ships,extraEquipment:{}});
+ }
+ return result;
+}
+// Filter the currently opened expedition menu without re-rendering the application.
+document.addEventListener('input',e=>{
+ if(!e.target.matches('.exp-picker-search input'))return;
+ const picker=e.target.closest('.exp-picker');
+ const query=e.target.value.normalize('NFKC').trim().toLowerCase();
+ let shown=0;
+ for(const choice of picker.querySelectorAll('.exp-choice')){
+  const matched=choice.dataset.search.normalize('NFKC').includes(query);
+  choice.classList.toggle('hidden',!matched);
+  if(matched)shown++;
+ }
+ picker.querySelector('.exp-picker-empty')?.classList.toggle('hidden',shown>0);
+});
+document.addEventListener('keydown',e=>{
+ const picker=e.target.closest('.exp-picker[open]');if(!picker)return;
+ if(e.key==='Escape'){e.preventDefault();picker.open=false;picker.querySelector('summary')?.focus();return;}
+ const buttons=[...picker.querySelectorAll('.exp-choice:not(.hidden)')];
+ if(e.key==='Enter'&&e.target.matches('.exp-picker-search input')){e.preventDefault();buttons[0]?.click();return;}
+ if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;
+ if(!e.target.matches('.exp-picker-search input, .exp-choice, .exp-picker-trigger'))return;
+ e.preventDefault();const current=buttons.indexOf(e.target);
+ const step=e.key==='ArrowDown'?1:-1;
+ buttons[(current<0?(step>0?0:buttons.length-1):(current+step+buttons.length)%buttons.length)]?.focus();
+});
+document.addEventListener('click',handleClick);
+document.addEventListener('change',handleChange);
+document.addEventListener('change',async e=>{
+ if(e.target.id==='json-file'){const file=e.target.files?.[0];if(!file)return;
+ try{let incoming=JSON.parse(await file.text());if(incoming.version!==1||!Array.isArray(incoming.presets)||!Array.isArray(incoming.fleets))throw Error('未対応の設定形式です');if(!confirm('現在の設定をファイルの内容で上書きしますか？'))return;state=incoming;ui.selectedPreset=state.presets[0]?.id||'';ui.selectedFleet=state.fleets[0]?.id||'';persist();render();}catch(err){alert('読み込み失敗：'+err.message)}
+ }
+});
+// Global common great probability control is inserted into overview by footer bar after first render.
+const oldRender=render;
+render=function(){oldRender();let summary=document.querySelector('.summary');const bar=document.createElement('div');bar.className='row-wrap';bar.style.cssText='margin-top:12px;padding-top:12px;border-top:1px solid #e5eef3;';bar.innerHTML=`<span class="note strong">共通大成功率</span><input type="number" min="0" max="100" step="1" value="${state.settings.commonGreatPct}" data-change="common" style="width:75px"><span class="note">%　（各遠征の「個別指定」「編成から推定」で上書き可）</span>`;summary.appendChild(bar);};
+schedulePresets();
+render();
+})();
+
+</script>
+</body>
+</html>
