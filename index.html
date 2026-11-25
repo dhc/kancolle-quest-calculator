@@ -182,7 +182,7 @@ function migrate(){
 }
 migrate();
 const migratedRewards=backfillRewards(data);
-for(const snap of snapshots)backfillRewards(snap.data);
+for(const snap of snapshots)if(backfillRewards(snap.data))delete snap.calculation;
 if(snapshots.length)storeSnapshots();
 function showNotice(msg,err=false){const el=$('notice');if(!el)return;el.textContent=msg;el.className=err?'msg error':'msg';}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({data,state}));}catch(e){showNotice('ブラウザ保存に失敗しました。JSON書き出しで退避してください。',true)}}
@@ -235,7 +235,7 @@ function mondayOf(dt){const copy=date(dt.getFullYear(),dt.getMonth()+1,dt.getDat
 function quarterOf(dt){return Math.floor((dt.getFullYear()*12+dt.getMonth()-2)/3)}
 function cycleOf(dt,month){return dt.getFullYear()-(dt.getMonth()+1 < (Number(month)||1)?1:0)}
 function periodKey(dt,period,startMonth){if(period==='D')return ds(dt);if(period==='W')return mondayOf(dt);if(period==='M')return dt.getFullYear()*12+dt.getMonth();if(period==='Q')return quarterOf(dt);return cycleOf(dt,startMonth)}
-function sameCycle(a,b,child,parent){const p=PER_RANK[child.period]>=PER_RANK[parent.period]?child.period:parent.period;const annualStart=p==='Y'?(child.period==='Y'?child.startMonth:parent.startMonth):1;return periodKey(a,p,annualStart)===periodKey(b,p,annualStart)}
+function cycleKey(dt,child,parent){const p=PER_RANK[child.period]>=PER_RANK[parent.period]?child.period:parent.period;const annualStart=p==='Y'?(child.period==='Y'?child.startMonth:parent.startMonth):1;return periodKey(dt,p,annualStart)}
 function basicEvents(q,fromYear,toYear){const events=[];for(let y=fromYear;y<=toYear;y++)for(let m=1;m<=12;m++){
  const last=new Date(y,m,0).getDate();
  if(q.period==='D')for(let d=1;d<=last;d++){const dt=date(y,m,d);if((q.dailyWeekdays||PRESET_DAYS[7]).includes(dt.getDay()))events.push(dt)}
@@ -250,19 +250,31 @@ function basicEvents(q,fromYear,toYear){const events=[];for(let y=fromYear;y<=to
  }return events}
 // For each configured occurrence, require an upstream occurrence in the corresponding reset window.
 // This is a frequency/period approximation: it does not simulate in-game flag sequencing within a day.
+// Reuse unchanged schedules; parent array identity propagates invalidation downstream.
+const scheduleMemo=new WeakMap();
 function buildSchedule(year,source=data){const index=new Map(source.map(q=>[q.id,q]));const cache=new Map(), visiting=new Set();
+ let previous=scheduleMemo.get(source);if(!previous||previous.year!==year)previous={year,rows:new Map()};
+ const next=new Map();
  function scheduled(q){if(cache.has(q.id))return cache.get(q.id);if(visiting.has(q.id))return [];visiting.add(q.id);
-  let list=[];
-  if(q.active&&isUnlocked(q,source)){
-   const parents=(q.prerequisites||[]).map(id=>index.get(id));const upstream=parents.map(p=>p?scheduled(p):[]);
-   list=basicEvents(q,year-1,year+1).filter(d=>parents.every((p,i)=>p&&upstream[i].some(pd=>sameCycle(d,pd,q,p))));
+  const parents=(q.prerequisites||[]).map(id=>index.get(id));
+  const active=!!q.active&&parents.every(p=>p?.active);
+  const upstream=active?parents.map(p=>scheduled(p)):[];
+  const signature=JSON.stringify([active,q.period,q.dailyWeekdays,q.weeklyWeeksPerMonth,q.weeklyPlacement,q.quarterOffset,q.startMonth,q.executionMonth,parents.map(p=>[p?.id,p?.period,p?.startMonth])]);
+  const old=previous.rows.get(q.id);
+  let list;
+  if(old&&old.signature===signature&&old.upstream.length===upstream.length&&upstream.every((dates,i)=>dates===old.upstream[i]))list=old.list;
+  else if(!active)list=[];
+  else{
+   const keys=parents.map((p,i)=>new Set(upstream[i].map(d=>cycleKey(d,q,p))));
+   list=basicEvents(q,year-1,year+1).filter(d=>parents.every((p,i)=>keys[i].has(cycleKey(d,q,p))));
   }
+  next.set(q.id,{signature,upstream,list});
   visiting.delete(q.id);cache.set(q.id,list);return list;
  }
  for(const q of source)scheduled(q);
- return cache;
+ scheduleMemo.set(source,{year,rows:next});return cache;
 }
-function computeFor(source,settings){const year=Number(settings.year);const schedule=buildSchedule(year,source);const byMonth=Array.from({length:12},()=>Object.fromEntries(allItems(source).map(k=>[k,0])));
+function computeFor(source,settings){const year=Number(settings.year);const schedule=buildSchedule(year,source);const items=allItems(source);const byMonth=Array.from({length:12},()=>Object.fromEntries(items.map(k=>[k,0])));
  const rowCounts=new Map();let enabled=0;
  for(const q of source){if(!q.active)continue;enabled++;
   const dates=(schedule.get(q.id)||[]).filter(d=>d.getFullYear()===year);
@@ -274,7 +286,12 @@ function computeFor(source,settings){const year=Number(settings.year);const sche
  const annual=Object.fromEntries(allItems(source).map(k=>[k,0]));for(const monthly of byMonth)for(const [k,v] of Object.entries(monthly))annual[k]=(annual[k]||0)+v;
  return{annual,byMonth,rowCounts,enabled};
 }
-function compute(){return computeFor(data,state);}
+let currentCalculation=null;
+function compute(){const year=Number(state.year),signature=JSON.stringify(data);if(!currentCalculation||currentCalculation.year!==year||currentCalculation.signature!==signature)currentCalculation={year,signature,result:computeFor(data,state)};return currentCalculation.result;}
+// Snapshot results are immutable until their year or calculation version changes.
+const CALC_VERSION=1;
+function snapshotCalculation(result,year){return{version:CALC_VERSION,year,annual:result.annual,byMonth:result.byMonth,rowCounts:[...result.rowCounts],enabled:result.enabled};}
+function comparisonCalculation(id,plan,year){if(id==='current')return compute();const cached=plan.calculation;if(cached?.version===CALC_VERSION&&cached.year===year&&cached.annual&&Array.isArray(cached.byMonth)&&cached.byMonth.length===12)return cached;plan.calculation=snapshotCalculation(computeFor(plan.data,{...plan.state,year}),year);storeSnapshots();return plan.calculation;}
 function textOfRewards(rewards){return Object.entries(rewards||{}).filter(([,v])=>v).map(([k,v])=>k+' '+(v>0?'+':'')+fmt(v)).join(' / ')||'—'}
 function matching(q){const term=$('search').value.trim().toLowerCase();if(term&&!(q.name+' '+(q.category||'')+' '+q.id).toLowerCase().includes(term))return false;
  if($('periodFilter').value&&q.period!==$('periodFilter').value)return false;
@@ -320,9 +337,11 @@ function updateParent(q,parentId,add){const prev=clone(q.prerequisites||[]);
 function prerequisiteEditor(q){const details=document.createElement('details');details.className='prereq-box';const summary=document.createElement('summary');
  summary.textContent='前提を編集'+((q.prerequisites||[]).length?'（'+q.prerequisites.length+'件）':'');details.append(summary);
  const parents=document.createElement('div');for(const id of q.prerequisites||[]){const p=data.find(x=>x.id===id);const chip=document.createElement('span');chip.className='parent-chip';chip.append(document.createTextNode(p?.name||id));const rem=document.createElement('button');rem.type='button';rem.textContent='×';rem.title='この前提を外す';rem.addEventListener('click',()=>updateParent(q,id,false));chip.append(rem);parents.append(chip)}details.append(parents);
- const candidates=data.filter(x=>x.id!==q.id&&!(q.prerequisites||[]).includes(x.id));
- const sel=createSelect([['','前提を追加…'],...candidates.map(p=>[p.id,PERIOD_LABEL[p.period]+' '+p.name])],'',v=>{if(v)updateParent(q,v,true)});
- details.append(sel);return details;
+ details.addEventListener('toggle',()=>{if(!details.open||details.querySelector('select'))return;
+  const candidates=data.filter(x=>x.id!==q.id&&!(q.prerequisites||[]).includes(x.id));
+  const sel=createSelect([['','前提を追加…'],...candidates.map(p=>[p.id,PERIOD_LABEL[p.period]+' '+p.name])],'',v=>{if(v)updateParent(q,v,true)});
+  details.append(sel);
+ });return details;
 }
 function renderStats(computed){const items=allItems();$('countBadge').textContent=data.length+'任務を登録';$('summary').textContent='実施 '+computed.enabled+' / '+data.length+'任務（選択した予定に基づく獲得見込み）';$('stats').replaceChildren();
  for(const k of BASE_ITEMS){const val=state.monthMode==='average'?(computed.annual[k]||0)/12:(computed.byMonth[(state.month||1)-1][k]||0);
@@ -406,7 +425,7 @@ function renderComparison(){
  if(!snapshots.length){const t=document.createElement('p');t.className='muted';t.textContent='条件Aを保存すると、現在の設定や別の保存済み条件と比較できます。';pane.append(t);return}
  const a=comparisonPlan($('compareA').value),b=comparisonPlan($('compareB').value);if(!a||!b)return;
  if($('compareA').value===$('compareB').value){const p=document.createElement('p');p.className='muted';p.textContent='異なる条件を2つ選んでください。';pane.append(p);return}
- const sharedYear=Number(state.year),aCalc=computeFor(a.data,{...a.state,year:sharedYear}),bCalc=computeFor(b.data,{...b.state,year:sharedYear});
+ const sharedYear=Number(state.year),aCalc=comparisonCalculation($('compareA').value,a,sharedYear),bCalc=comparisonCalculation($('compareB').value,b,sharedYear);
  const items=[...new Set([...allItems(a.data),...allItems(b.data)])];
  const itemSel=$('compareItem'),picked=itemSel.value;itemSel.replaceChildren(...items.map(k=>new Option(k,k)));itemSel.value=items.includes(picked)?picked:'ネジ';
  const unit=state.monthMode==='average'?'月平均':state.month+'月';
@@ -429,7 +448,7 @@ function setupComparison(){
  $('captureSnapshot').addEventListener('click',()=>{
   if(snapshots.length>=8){showNotice('一時保存は最大8件です。不要な条件を削除してから保存してください。',true);return}
   const label=$('snapshotName').value.trim()||'条件 '+(snapshots.length+1);
-  snapshots.push({id:'plan-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),label,data:clone(data),state:clone(state),savedAt:new Date().toLocaleString('ja-JP')});
+  snapshots.push({id:'plan-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),label,data:clone(data),state:clone(state),calculation:snapshotCalculation(compute(),Number(state.year)),savedAt:new Date().toLocaleString('ja-JP')});
   storeSnapshots();$('snapshotName').value='';fillComparisonControls(true);renderComparison();showNotice('「'+label+'」を一時保存しました。設定を変更すると、保存条件と現在の条件を比較できます。');
  });
  $('compareA').addEventListener('change',renderComparison);$('compareB').addEventListener('change',renderComparison);$('compareItem').addEventListener('change',renderComparison);
