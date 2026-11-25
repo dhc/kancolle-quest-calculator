@@ -1,0 +1,1423 @@
+[
+  {
+    "id": "D-001",
+    "name": "敵艦隊を撃破せよ！",
+    "period": "D",
+    "rewards": {
+      "釘": 1,
+      "燃料": 50,
+      "弾薬": 50
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-002",
+    "name": "敵艦隊主力を撃滅せよ！",
+    "period": "D",
+    "rewards": {
+      "釘": 1,
+      "バケツ": 1,
+      "燃料": 50,
+      "弾薬": 50,
+      "鋼材": 50,
+      "ボーキ": 50
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "D-001"
+    ],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-003",
+    "name": "敵艦隊を10回邀撃せよ！",
+    "period": "D",
+    "rewards": {
+      "釘": 1,
+      "燃料": 150,
+      "弾薬": 150,
+      "鋼材": 200,
+      "ボーキ": 100
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "D-002"
+    ],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-004",
+    "name": "敵補給艦を3隻撃沈せよ！",
+    "period": "D",
+    "rewards": {
+      "釘": 1,
+      "バケツ": 1,
+      "燃料": 100,
+      "弾薬": 50,
+      "鋼材": 200,
+      "ボーキ": 50
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "D-002"
+    ],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-005",
+    "name": "南西諸島海域の制海権を握れ！",
+    "period": "D",
+    "rewards": {
+      "バーナー": 1,
+      "バケツ": 1,
+      "燃料": 300,
+      "ボーキ": 200
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "D-004"
+    ],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-006",
+    "name": "敵潜水艦を制圧せよ！",
+    "period": "D",
+    "rewards": {
+      "バケツ": 1,
+      "燃料": 300,
+      "弾薬": 30,
+      "鋼材": 300,
+      "ボーキ": 30
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "D-005"
+    ],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-007",
+    "name": "演習を3回実施せよ",
+    "period": "D",
+    "rewards": {
+      "バーナー": 1,
+      "燃料": 50,
+      "鋼材": 50
+    },
+    "active": false,
+    "completion": 100,
+    "category": "演習",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-008",
+    "name": "演習で5回勝利せよ",
+    "period": "D",
+    "rewards": {
+      "釘": 1,
+      "弾薬": 50,
+      "ボーキ": 50
+    },
+    "active": false,
+    "completion": 100,
+    "category": "演習",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-009",
+    "name": "遠征を3回成功させよう！",
+    "period": "D",
+    "rewards": {
+      "釘": 1,
+      "燃料": 100,
+      "弾薬": 100,
+      "鋼材": 100,
+      "ボーキ": 100
+    },
+    "active": false,
+    "completion": 100,
+    "category": "遠征",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-010",
+    "name": "遠征を10回成功させよう！",
+    "period": "D",
+    "rewards": {
+      "燃料": 150,
+      "弾薬": 300,
+      "鋼材": 300,
+      "ボーキ": 150
+    },
+    "active": false,
+    "completion": 100,
+    "category": "遠征",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-011",
+    "name": "艦娘を5回「入渠」させよ！",
+    "period": "D",
+    "rewards": {
+      "バケツ": 2,
+      "燃料": 30,
+      "弾薬": 30,
+      "鋼材": 30,
+      "ボーキ": 30
+    },
+    "active": false,
+    "completion": 100,
+    "category": "補給/入渠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-012",
+    "name": "艦娘に15回「補給」せよ！",
+    "period": "D",
+    "rewards": {
+      "釘": 1,
+      "バーナー": 1,
+      "燃料": 50,
+      "弾薬": 50,
+      "鋼材": 50,
+      "ボーキ": 50
+    },
+    "active": false,
+    "completion": 100,
+    "category": "補給/入渠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-013",
+    "name": "新装備「開発」指令",
+    "period": "D",
+    "rewards": {
+      "釘": 1,
+      "バーナー": 1,
+      "燃料": 40,
+      "弾薬": 40,
+      "鋼材": 40,
+      "ボーキ": 40
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-014",
+    "name": "新造艦「建造」指令",
+    "period": "D",
+    "rewards": {
+      "釘": 1,
+      "バケツ": 1,
+      "燃料": 50,
+      "弾薬": 50,
+      "鋼材": 50,
+      "ボーキ": 50
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-015",
+    "name": "装備「開発」集中強化！",
+    "period": "D",
+    "rewards": {
+      "釘": 2,
+      "燃料": 100,
+      "弾薬": 100,
+      "鋼材": 100,
+      "ボーキ": 100
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-016",
+    "name": "艦娘「建造」艦隊強化！",
+    "period": "D",
+    "rewards": {
+      "釘": 2,
+      "バーナー": 1,
+      "燃料": 200,
+      "弾薬": 200,
+      "鋼材": 300,
+      "ボーキ": 100
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-017",
+    "name": "艦娘「解体」任務",
+    "period": "D",
+    "rewards": {
+      "バケツ": 1,
+      "ボーキ": 50
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-018",
+    "name": "艦娘を「近代化改修」せよ！",
+    "period": "D",
+    "rewards": {
+      "バケツ": 1,
+      "燃料": 20,
+      "弾薬": 20,
+      "鋼材": 50
+    },
+    "active": false,
+    "completion": 100,
+    "category": "改装",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-019",
+    "name": "装備の改修強化",
+    "period": "D",
+    "rewards": {
+      "ネジ": 1,
+      "弾薬": 50
+    },
+    "active": true,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "note": "改修に使うネジ・釘の支出は含まない",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-020",
+    "name": "続：装備の改修強化",
+    "period": "D",
+    "rewards": {
+      "ネジ": 1,
+      "弾薬": 40
+    },
+    "active": true,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "note": "2026年4月追加。前提デイリー達成後に開放",
+    "prerequisites": [
+      "D-019"
+    ],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-021",
+    "name": "装備開発力の整備",
+    "period": "D",
+    "rewards": {
+      "釘": 1,
+      "鋼材": 100
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "D-022",
+    "name": "工廠環境の整備",
+    "period": "D",
+    "rewards": {
+      "釘": 1,
+      "バケツ": 1,
+      "弾薬": 100
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "dailyWeekdays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-023",
+    "name": "あ号作戦",
+    "period": "W",
+    "rewards": {
+      "釘": 2,
+      "バーナー": 2,
+      "燃料": 300,
+      "弾薬": 300,
+      "鋼材": 300,
+      "ボーキ": 100
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "D-002"
+    ],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-024",
+    "name": "い号作戦",
+    "period": "W",
+    "rewards": {
+      "釘": 2,
+      "弾薬": 500,
+      "ボーキ": 500
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "D-004"
+    ],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-025",
+    "name": "海上通商破壊作戦",
+    "period": "W",
+    "rewards": {
+      "釘": 3,
+      "燃料": 500,
+      "鋼材": 400
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "D-002"
+    ],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-026",
+    "name": "ろ号作戦",
+    "period": "W",
+    "rewards": {
+      "バケツ": 3,
+      "燃料": 400,
+      "鋼材": 800
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "W-023"
+    ],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-027",
+    "name": "海上護衛戦",
+    "period": "W",
+    "rewards": {
+      "ネジ": 1,
+      "バケツ": 2,
+      "燃料": 600
+    },
+    "active": true,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "W-024"
+    ],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-028",
+    "name": "敵北方艦隊主力を撃滅せよ！",
+    "period": "W",
+    "rewards": {
+      "ネジ": 3,
+      "釘": 3,
+      "燃料": 300,
+      "弾薬": 300,
+      "鋼材": 400,
+      "ボーキ": 300
+    },
+    "active": true,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-029",
+    "name": "敵東方艦隊を撃滅せよ！",
+    "period": "W",
+    "rewards": {
+      "釘": 2,
+      "燃料": 400,
+      "ボーキ": 700
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "W-027"
+    ],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-030",
+    "name": "敵東方中枢艦隊を撃破せよ！",
+    "period": "W",
+    "rewards": {
+      "釘": 1,
+      "バケツ": 1,
+      "燃料": 500,
+      "鋼材": 500
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "W-029"
+    ],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-031",
+    "name": "南方海域珊瑚諸島沖の制空権を握れ！",
+    "period": "W",
+    "rewards": {
+      "ネジ": 2,
+      "釘": 2,
+      "弾薬": 400,
+      "ボーキ": 800
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "W-030"
+    ],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-032",
+    "name": "海上輸送路の安全確保に努めよ！",
+    "period": "W",
+    "rewards": {
+      "ネジ": 3,
+      "燃料": 100
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "W-026"
+    ],
+    "untrackedPrerequisites": [
+      "単発：改修工廠を準備せよ！"
+    ],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-033",
+    "name": "大規模演習（20勝）",
+    "period": "W",
+    "rewards": {
+      "ネジ": 1,
+      "釘": 2,
+      "燃料": 200,
+      "弾薬": 200,
+      "鋼材": 200,
+      "ボーキ": 200
+    },
+    "active": false,
+    "completion": 100,
+    "category": "演習",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "note": "Wiki資材一覧の「演習勝利20回」に対応する短縮名",
+    "prerequisites": [],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-034",
+    "name": "大規模遠征作戦、発令！（30回）",
+    "period": "W",
+    "rewards": {
+      "釘": 3,
+      "燃料": 300,
+      "弾薬": 500,
+      "鋼材": 500,
+      "ボーキ": 300
+    },
+    "active": false,
+    "completion": 100,
+    "category": "遠征",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-035",
+    "name": "南方への鼠輸送を継続実施せよ！",
+    "period": "W",
+    "rewards": {
+      "ネジ": 1,
+      "釘": 2,
+      "燃料": 400,
+      "ボーキ": 400
+    },
+    "active": false,
+    "completion": 100,
+    "category": "遠征",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-036",
+    "name": "近代化改修を進め、戦備を整えよ！（15回）",
+    "period": "W",
+    "rewards": {
+      "釘": 2,
+      "バーナー": 1,
+      "燃料": 200,
+      "弾薬": 200,
+      "鋼材": 300,
+      "ボーキ": 100
+    },
+    "active": false,
+    "completion": 100,
+    "category": "改装",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-037",
+    "name": "対空機銃量産",
+    "period": "W",
+    "rewards": {
+      "ネジ": 1,
+      "釘": 2,
+      "弾薬": 100,
+      "ボーキ": 200
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-038",
+    "name": "装備開発力の集中整備",
+    "period": "W",
+    "rewards": {
+      "釘": 7,
+      "バケツ": 1,
+      "弾薬": 200
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-039",
+    "name": "継戦支援能力の整備",
+    "period": "W",
+    "rewards": {
+      "バケツ": 5,
+      "弾薬": 500,
+      "ボーキ": 150
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "W-040",
+    "name": "装備の改修集中強化",
+    "period": "W",
+    "rewards": {
+      "ネジ": 3,
+      "鋼材": 50
+    },
+    "active": true,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "choiceGroups": [
+      {
+        "name": "選択報酬1",
+        "options": [
+          {
+            "label": "ネジ×2",
+            "rewards": {
+              "ネジ": 2
+            }
+          },
+          {
+            "label": "釘×6",
+            "rewards": {
+              "釘": 6
+            }
+          }
+        ]
+      }
+    ],
+    "note": "固定報酬のネジ3個に加え選択報酬1組。任務の前提条件に注意",
+    "prerequisites": [
+      "D-020",
+      "W-033"
+    ],
+    "weeklyWeeksPerMonth": "all",
+    "weeklyPlacement": "first",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "M-041",
+    "name": "「第五戦隊」出撃せよ！",
+    "period": "M",
+    "rewards": {
+      "釘": 5,
+      "弾薬": 550,
+      "鋼材": 550
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "M-042",
+    "name": "「水雷戦隊」南西へ！",
+    "period": "M",
+    "rewards": {
+      "ネジ": 3,
+      "燃料": 500,
+      "ボーキ": 300
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "W-026"
+    ],
+    "untrackedPrerequisites": [
+      "他の単発任務（詳細要確認）"
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "M-043",
+    "name": "「水上打撃部隊」南方へ！",
+    "period": "M",
+    "rewards": {
+      "ネジ": 4,
+      "バケツ": 3,
+      "燃料": 350,
+      "弾薬": 400,
+      "鋼材": 350
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "M-044",
+    "name": "海上護衛強化月間",
+    "period": "M",
+    "rewards": {
+      "ネジ": 3,
+      "釘": 5,
+      "燃料": 800
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "M-041"
+    ],
+    "untrackedPrerequisites": [
+      "単発：「第十八駆逐隊」出撃せよ！"
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "M-045",
+    "name": "「空母機動部隊」西へ！",
+    "period": "M",
+    "rewards": {
+      "ネジ": 2,
+      "鋼材": 600,
+      "ボーキ": 800
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "W-026"
+    ],
+    "untrackedPrerequisites": [
+      "単発：「第八駆逐隊」出撃せよ！"
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "M-046",
+    "name": "「水上反撃部隊」突入せよ！",
+    "period": "M",
+    "rewards": {
+      "ネジ": 2,
+      "釘": 4,
+      "弾薬": 600,
+      "ボーキ": 200
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "M-045"
+    ],
+    "untrackedPrerequisites": [
+      "単発：軽快な「水上反撃部隊」を編成せよ！"
+    ],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "M-047",
+    "name": "精鋭艦隊演習",
+    "period": "M",
+    "rewards": {
+      "バケツ": 2,
+      "弾薬": 400,
+      "ボーキ": 200
+    },
+    "active": false,
+    "completion": 100,
+    "category": "演習",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "Q-048",
+    "name": "沖ノ島海域迎撃戦",
+    "period": "Q",
+    "rewards": {
+      "ネジ": 5,
+      "燃料": 800,
+      "弾薬": 800,
+      "鋼材": 800,
+      "給糧艦「間宮」": 1
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "M-045"
+    ],
+    "untrackedPrerequisites": [
+      "単発：「第六戦隊」出撃せよ！（要確認）"
+    ],
+    "quarterOffset": 0,
+    "rewardDetailSource": "https://kannagi35.com/content/kantai-collection-quest-quarterly",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "Q-049",
+    "name": "「熟練搭乗員」養成",
+    "period": "Q",
+    "rewards": {
+      "ネジ": 4,
+      "ボーキ": 100,
+      "熟練搭乗員": 1
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "quarterOffset": 0,
+    "rewardDetailSource": "https://kannagi35.com/content/kantai-collection-quest-quarterly",
+    "note": "勲章×2と改修済み九六式艦戦などの消費は差し引いていません（獲得数のみ）。",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "Q-050",
+    "name": "主力「陸攻」の調達",
+    "period": "Q",
+    "rewards": {
+      "釘": 2,
+      "燃料": 250,
+      "弾薬": 250,
+      "一式陸攻": 1
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "quarterOffset": 0,
+    "rewardDetailSource": "https://kannagi35.com/content/kantai-collection-quest-quarterly",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "Q-051",
+    "name": "戦果拡張任務！「Z作戦」前段作戦",
+    "period": "Q",
+    "rewards": {
+      "ネジ": 4,
+      "弾薬": 2000,
+      "戦果": 350,
+      "給糧艦「伊良湖」": 1
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [
+      "W-024"
+    ],
+    "untrackedPrerequisites": [
+      "単発：潜水艦隊、中部海域の哨戒を実施せよ！"
+    ],
+    "quarterOffset": 0,
+    "rewardDetailSource": "https://kannagi35.com/content/kantai-collection-quest-quarterly",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "Q-052",
+    "name": "強行輸送艦隊、抜錨！",
+    "period": "Q",
+    "rewards": {
+      "バケツ": 4,
+      "燃料": 1000,
+      "弾薬": 400,
+      "鋼材": 400,
+      "洋上補給": 1
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "quarterOffset": 0,
+    "rewardCatalogVersion": 4,
+    "rewardDetailSource": "https://kannagi35.com/content/kantai-collection-quest-quarterly"
+  },
+  {
+    "id": "Q-053",
+    "name": "前線の航空偵察を実施せよ！",
+    "period": "Q",
+    "rewards": {
+      "ネジ": 4,
+      "釘": 8,
+      "弾薬": 800,
+      "ボーキ": 1000
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "quarterOffset": 0,
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "Q-054",
+    "name": "海上通商航路の警戒を厳とせよ！",
+    "period": "Q",
+    "rewards": {
+      "釘": 4,
+      "燃料": 800,
+      "戦闘糧食": 2
+    },
+    "active": false,
+    "completion": 100,
+    "category": "遠征",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "quarterOffset": 0,
+    "rewardDetailSource": "https://kannagi35.com/content/kantai-collection-quest-quarterly",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "Q-055",
+    "name": "敵潜を制圧せよ！",
+    "period": "Q",
+    "rewards": {
+      "ネジ": 3,
+      "弾薬": 1000,
+      "ボーキ": 300,
+      "九五式爆雷": 1
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "quarterOffset": 0,
+    "rewardDetailSource": "https://kannagi35.com/content/kantai-collection-quest-quarterly",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "Q-056",
+    "name": "新型艤装の継続研究",
+    "period": "Q",
+    "rewards": {
+      "釘": 3,
+      "弾薬": 600
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "quarterOffset": 0,
+    "choiceGroups": [
+      {
+        "name": "選択報酬",
+        "selected": 0,
+        "options": [
+          {
+            "label": "勲章×1",
+            "rewards": {
+              "勲章": 1
+            }
+          },
+          {
+            "label": "新型砲熕兵装資材×1",
+            "rewards": {
+              "新型砲熕兵装資材": 1
+            }
+          }
+        ]
+      }
+    ],
+    "rewardDetailSource": "https://kannagi35.com/content/kantai-collection-quest-quarterly",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "Q-057",
+    "name": "運用装備の統合整備",
+    "period": "Q",
+    "rewards": {
+      "ネジ": 4,
+      "燃料": 200
+    },
+    "active": false,
+    "completion": 100,
+    "category": "工廠",
+    "source": "https://wikiwiki.jp/kancolle/%E8%B3%87%E6%9D%90",
+    "prerequisites": [],
+    "quarterOffset": 0,
+    "choiceGroups": [
+      {
+        "name": "選択報酬",
+        "selected": 0,
+        "options": [
+          {
+            "label": "一式戦 隼II型×1",
+            "rewards": {
+              "一式戦 隼II型": 1
+            }
+          },
+          {
+            "label": "紫電一一型×1",
+            "rewards": {
+              "紫電一一型": 1
+            }
+          },
+          {
+            "label": "ネジ×4",
+            "rewards": {
+              "ネジ": 4
+            }
+          }
+        ]
+      }
+    ],
+    "rewardDetailSource": "https://kannagi35.com/content/kantai-collection-quest-quarterly",
+    "rewardCatalogVersion": 4
+  },
+  {
+    "id": "Y-058",
+    "name": "「吹雪改三」抜錨します！見てくださいっ！",
+    "period": "Y",
+    "rewards": {
+      "燃料": 1945,
+      "弾薬": 1946
+    },
+    "active": false,
+    "completion": 100,
+    "category": "出撃",
+    "source": "https://zekamashi.net/kancolle-kouryaku/kousyousigen/",
+    "startMonth": 4,
+    "choiceGroups": [
+      {
+        "name": "選択報酬1",
+        "options": [
+          {
+            "label": "工廠資源×5",
+            "rewards": {
+              "工廠資源": 5
+            }
+          },
+          {
+            "label": "海外艦最新技術×3",
+            "rewards": {
+              "海外艦最新技術": 3
+            }
+          },
+          {
+            "label": "釘×88",
+            "rewards": {
+              "釘": 88
+            }
+          }
+        ]
+      },
+      {
+        "name": "選択報酬2",
+        "selected": 0,
+        "options": [
+          {
+            "label": "12.7cm単装高角砲改二 ★+6×1",
+            "rewards": {
+              "12.7cm単装高角砲改二 ★+6": 1
+            }
+          },
+          {
+            "label": "試製 23号電探改三×1",
+            "rewards": {
+              "試製 23号電探改三": 1
+            }
+          },
+          {
+            "label": "勲章×5",
+            "rewards": {
+              "勲章": 5
+            }
+          }
+        ]
+      }
+    ],
+    "note": "選択報酬が2組あります。期間内に1回。消費資材は差し引いていません。",
+    "prerequisites": [],
+    "executionMonth": 4,
+    "rewardDetailSource": "https://zekamashi.net/kancolle-kouryaku/hubukikaisan-batubyou/",
+    "rewardCatalogVersion": 4
+  }
+]
