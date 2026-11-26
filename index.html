@@ -39,10 +39,10 @@ input[type="text"],input[type="number"],select,textarea{background:#111b2c;color
 </style>
 </head>
 <body><main>
-<div class="header"><div><h1>艦これ 定期任務 資材計算器 <span class="pill" id="countBadge"></span></h1><p>実施する任務・達成率・選択報酬を設定して、ネジ・釘などの主要資材を月別・年間で集計します。資源・勲章・装備・各種アイテムは詳細欄にまとめて表示します。データと設定はこのブラウザ内に保存され、外部送信されません。</p></div><span class="tag">試作版 v4 / 2026-11</span></div>
+<div class="header"><div><h1>艦これ 定期任務 資材計算器 <span class="pill" id="countBadge"></span></h1><p>実施する任務・達成率・選択報酬を設定して、ネジ・釘などの主要資材を月別・12か月で集計します。資源・勲章・装備・各種アイテムは詳細欄にまとめて表示します。データと設定はこのブラウザ内に保存され、外部送信されません。</p></div><span class="tag">試作版 v4 / 2026-11</span></div>
 <section class="panel">
- <div class="selectline"><label>計算対象年 <select id="year"></select></label><label>月間表示 <select id="monthMode"><option value="average">年平均（月あたり）</option><option value="actual">指定月</option></select></label><label id="monthPickerWrap" class="hidden">対象月 <select id="monthPicker"></select></label></div>
- <p class="muted">デイリーは曜日を指定、ウィークリーは月あたりの週数を指定、クォータリーは各期の実施月、イヤーリーは実施月を任務ごとに指定します。週は月曜日始まり。「年平均（月）」は年間総数÷12です。</p>
+ <div class="selectline"><span id="periodLabel" class="pill"></span><label>月間表示 <select id="monthMode"><option value="average">月平均（今後12か月）</option><option value="actual">指定月</option></select></label><label id="monthPickerWrap" class="hidden">対象月 <select id="monthPicker"></select></label></div>
+ <p class="muted">デイリーは曜日を指定、ウィークリーは月あたりの週数を指定、クォータリーは各期の実施月、イヤーリーは実施月を任務ごとに指定します。週は月曜日始まり。今月の月初から12か月間を集計します。月平均は12か月合計÷12です。</p>
  <div class="grid" id="stats"></div>
  <div class="toolbar" style="margin-top:12px"><label>月別グラフ資材 <select id="chartItem"></select></label><span class="muted" id="summary"></span></div>
  <div class="monthgrid" id="monthChart"></div>
@@ -71,13 +71,13 @@ input[type="text"],input[type="number"],select,textarea{background:#111b2c;color
   <label class="field" style="max-width:140px"><span class="label">月別比較の資材</span><select id="compareItem"></select></label>
   <button id="restoreSnapshot">選択した条件Aを編集に復元</button>
  </div>
- <p class="muted">差分は「B − A」です。計算対象年は画面上部の指定年に統一し、実施ON/OFF・選択報酬・各任務のスケジュールをそれぞれの条件で計算します。月間欄は画面上部の「月間表示」と連動します。</p>
+ <p class="muted">差分は「B − A」です。計算期間は今月から12か月間に統一し、実施ON/OFF・選択報酬・各任務のスケジュールをそれぞれの条件で計算します。月間欄は画面上部の「月間表示」と連動します。</p>
  <div id="comparisonResult"></div>
 </section>
 <section class="panel">
  <div class="toolbar"><input id="search" type="text" placeholder="任務名・分類で検索" style="min-width:190px;flex:2"/><select id="periodFilter"><option value="">全周期</option><option value="D">デイリー</option><option value="W">ウィークリー</option><option value="M">マンスリー</option><option value="Q">クォータリー</option><option value="Y">イヤーリー</option></select><select id="onlyFilter"><option value="all">すべて表示</option><option value="active">実施する任務のみ</option><option value="optional">選択報酬あり</option></select><label class="pill"><input id="treeMode" type="checkbox" checked> ツリー順</label><button id="setAll">表示中をON</button><button id="clearAll">表示中をOFF</button></div>
  <p class="muted">前提のある任務は、上流を実施ONにして初めてチェックできます。上流をOFFにすると後続もOFFになります。日・週・季・年の予定は任務ごとに指定できます。任務名は一部短縮しています。報酬は<strong>獲得量（グロス）</strong>で、改修や装備開発による支出は含まれません。</p>
- <div class="tableWrap"><table><thead><tr><th>実施</th><th>任務 / 周期</th><th>実施スケジュール</th><th>確定報酬</th><th>選択報酬</th><th>年合計（設定値）</th></tr></thead><tbody id="questRows"></tbody></table></div>
+ <div class="tableWrap"><table><thead><tr><th>実施</th><th>任務 / 周期</th><th>実施スケジュール</th><th>確定報酬</th><th>選択報酬</th><th>12か月合計（設定値）</th></tr></thead><tbody id="questRows"></tbody></table></div>
 </section>
 <section class="panel">
 <h2>任務を手動追加</h2><p class="muted">Wikiで新しい任務を確認したら追加できます。選択報酬は「ネジ:2｜釘:6」のように入力（半角の | 区切り、複数資材は「ネジ:2,釘:3」）。</p>
@@ -142,9 +142,15 @@ try{saved=JSON.parse(localStorage.getItem(KEY));}catch(e){}
 if(!saved){try{saved=JSON.parse(localStorage.getItem(OLD_KEY));oldFormat=!!saved;}catch(e){}}
 data=Array.isArray(saved?.data)?clone(saved.data):clone(SEED);
 const today=new Date();
-const defaultState={year:today.getFullYear(),monthMode:'average',month:today.getMonth()+1,chartItem:'ネジ',treeMode:true,dailyDefaultDays:7,quarterDefaultOffset:0};
+function monthSerial(dt){return dt.getFullYear()*12+dt.getMonth()}
+function currentPeriod(){return monthSerial(new Date())}
+function monthLabel(serial){return Math.floor(serial/12)+'年'+(serial%12+1)+'月'}
+function periodLabel(start){return monthLabel(start)+' ～ '+monthLabel(start+11)}
+function selectedMonthIndex(){const i=Number(state.month)-currentPeriod();return Number.isInteger(i)&&i>=0&&i<12?i:0}
+const defaultState={monthMode:'average',month:monthSerial(today),chartItem:'ネジ',treeMode:true,dailyDefaultDays:7,quarterDefaultOffset:0};
 state={...defaultState,...(saved?.state||{})};
-if(![2024,2025,2026,2027,2028,2029,2030,2031,2032,2033,2034,2035].includes(Number(state.year)))state.year=today.getFullYear();
+delete state.year;
+if(selectedMonthIndex()===0)state.month=currentPeriod();
 if(!Number.isInteger(state.dailyDefaultDays)||state.dailyDefaultDays<0||state.dailyDefaultDays>7)state.dailyDefaultDays=7;
 if(![0,1,2].includes(state.quarterDefaultOffset))state.quarterDefaultOffset=0;
 let snapshots=[];
@@ -252,8 +258,8 @@ function basicEvents(q,fromYear,toYear){const events=[];for(let y=fromYear;y<=to
 // This is a frequency/period approximation: it does not simulate in-game flag sequencing within a day.
 // Reuse unchanged schedules; parent array identity propagates invalidation downstream.
 const scheduleMemo=new WeakMap();
-function buildSchedule(year,source=data){const index=new Map(source.map(q=>[q.id,q]));const cache=new Map(), visiting=new Set();
- let previous=scheduleMemo.get(source);if(!previous||previous.year!==year)previous={year,rows:new Map()};
+function buildSchedule(start,source=data){const year=Math.floor(start/12),endYear=Math.floor((start+11)/12);const index=new Map(source.map(q=>[q.id,q]));const cache=new Map(), visiting=new Set();
+ let previous=scheduleMemo.get(source);if(!previous||previous.start!==start)previous={start,rows:new Map()};
  const next=new Map();
  function scheduled(q){if(cache.has(q.id))return cache.get(q.id);if(visiting.has(q.id))return [];visiting.add(q.id);
   const parents=(q.prerequisites||[]).map(id=>index.get(id));
@@ -266,32 +272,32 @@ function buildSchedule(year,source=data){const index=new Map(source.map(q=>[q.id
   else if(!active)list=[];
   else{
    const keys=parents.map((p,i)=>new Set(upstream[i].map(d=>cycleKey(d,q,p))));
-   list=basicEvents(q,year-1,year+1).filter(d=>parents.every((p,i)=>keys[i].has(cycleKey(d,q,p))));
+   list=basicEvents(q,year-1,endYear+1).filter(d=>parents.every((p,i)=>keys[i].has(cycleKey(d,q,p))));
   }
   next.set(q.id,{signature,upstream,list});
   visiting.delete(q.id);cache.set(q.id,list);return list;
  }
  for(const q of source)scheduled(q);
- scheduleMemo.set(source,{year,rows:next});return cache;
+ scheduleMemo.set(source,{start,rows:next});return cache;
 }
-function computeFor(source,settings){const year=Number(settings.year);const schedule=buildSchedule(year,source);const items=allItems(source);const byMonth=Array.from({length:12},()=>Object.fromEntries(items.map(k=>[k,0])));
+function computeFor(source,start){const schedule=buildSchedule(start,source);const items=allItems(source);const byMonth=Array.from({length:12},()=>Object.fromEntries(items.map(k=>[k,0])));
  const rowCounts=new Map();let enabled=0;
  for(const q of source){if(!q.active)continue;enabled++;
-  const dates=(schedule.get(q.id)||[]).filter(d=>d.getFullYear()===year);
+  const dates=(schedule.get(q.id)||[]).filter(d=>monthSerial(d)>=start&&monthSerial(d)<start+12);
   const pct=Math.min(100,Math.max(0,Number(q.completion??100)))/100;
   rowCounts.set(q.id,dates.length*pct);
   const reward=rewardOf(q);
-  for(const d of dates){const entry=byMonth[d.getMonth()];for(const [k,v] of Object.entries(reward))entry[k]=(entry[k]||0)+v*pct;}
+  for(const d of dates){const entry=byMonth[monthSerial(d)-start];for(const [k,v] of Object.entries(reward))entry[k]=(entry[k]||0)+v*pct;}
  }
  const annual=Object.fromEntries(allItems(source).map(k=>[k,0]));for(const monthly of byMonth)for(const [k,v] of Object.entries(monthly))annual[k]=(annual[k]||0)+v;
  return{annual,byMonth,rowCounts,enabled};
 }
 let currentCalculation=null;
-function compute(){const year=Number(state.year),signature=JSON.stringify(data);if(!currentCalculation||currentCalculation.year!==year||currentCalculation.signature!==signature)currentCalculation={year,signature,result:computeFor(data,state)};return currentCalculation.result;}
+function compute(){const start=currentPeriod(),signature=JSON.stringify(data);if(!currentCalculation||currentCalculation.start!==start||currentCalculation.signature!==signature)currentCalculation={start,signature,result:computeFor(data,start)};return currentCalculation.result;}
 // Snapshot results are immutable until their year or calculation version changes.
-const CALC_VERSION=1;
-function snapshotCalculation(result,year){return{version:CALC_VERSION,year,annual:result.annual,byMonth:result.byMonth,rowCounts:[...result.rowCounts],enabled:result.enabled};}
-function comparisonCalculation(id,plan,year){if(id==='current')return compute();const cached=plan.calculation;if(cached?.version===CALC_VERSION&&cached.year===year&&cached.annual&&Array.isArray(cached.byMonth)&&cached.byMonth.length===12)return cached;plan.calculation=snapshotCalculation(computeFor(plan.data,{...plan.state,year}),year);storeSnapshots();return plan.calculation;}
+const CALC_VERSION=2;
+function snapshotCalculation(result,start){return{version:CALC_VERSION,start,annual:result.annual,byMonth:result.byMonth,rowCounts:[...result.rowCounts],enabled:result.enabled};}
+function comparisonCalculation(id,plan,start){if(id==='current')return compute();const cached=plan.calculation;if(cached?.version===CALC_VERSION&&cached.start===start&&cached.annual&&Array.isArray(cached.byMonth)&&cached.byMonth.length===12)return cached;plan.calculation=snapshotCalculation(computeFor(plan.data,start),start);storeSnapshots();return plan.calculation;}
 function textOfRewards(rewards){return Object.entries(rewards||{}).filter(([,v])=>v).map(([k,v])=>k+' '+(v>0?'+':'')+fmt(v)).join(' / ')||'—'}
 function matching(q){const term=$('search').value.trim().toLowerCase();if(term&&!(q.name+' '+(q.category||'')+' '+q.id).toLowerCase().includes(term))return false;
  if($('periodFilter').value&&q.period!==$('periodFilter').value)return false;
@@ -343,19 +349,20 @@ function prerequisiteEditor(q){const details=document.createElement('details');d
   details.append(sel);
  });return details;
 }
-function renderStats(computed){const items=allItems();$('countBadge').textContent=data.length+'任務を登録';$('summary').textContent='実施 '+computed.enabled+' / '+data.length+'任務（選択した予定に基づく獲得見込み）';$('stats').replaceChildren();
- for(const k of BASE_ITEMS){const val=state.monthMode==='average'?(computed.annual[k]||0)/12:(computed.byMonth[(state.month||1)-1][k]||0);
+function refreshPeriodControls(){const start=currentPeriod();$('periodLabel').textContent=periodLabel(start);const picker=$('monthPicker');if(picker.dataset.start!==String(start)){state.month=start+selectedMonthIndex();picker.replaceChildren(...Array.from({length:12},(_,i)=>new Option(monthLabel(start+i),start+i)));picker.dataset.start=String(start);picker.value=state.month;}}
+function renderStats(computed){refreshPeriodControls();const items=allItems();$('countBadge').textContent=data.length+'任務を登録';$('summary').textContent='実施 '+computed.enabled+' / '+data.length+'任務（選択した予定に基づく獲得見込み）';$('stats').replaceChildren();
+ for(const k of BASE_ITEMS){const val=state.monthMode==='average'?(computed.annual[k]||0)/12:(computed.byMonth[selectedMonthIndex()][k]||0);
  const el=document.createElement('div');el.className='stat';const label=document.createElement('div');label.className='label';label.textContent=k;
- const big=document.createElement('b');big.textContent=fmt(val);const sub=document.createElement('div');sub.className='span';sub.textContent=state.monthMode==='average'?'月平均':state.month+'月の獲得見込み';const yr=document.createElement('div');yr.className='year';yr.textContent='年間 '+fmt(computed.annual[k]||0);el.append(label,big,sub,yr);$('stats').append(el)}
+ const big=document.createElement('b');big.textContent=fmt(val);const sub=document.createElement('div');sub.className='span';sub.textContent=state.monthMode==='average'?'月平均':monthLabel(currentPeriod()+selectedMonthIndex())+'の獲得見込み';const yr=document.createElement('div');yr.className='year';yr.textContent='12か月 '+fmt(computed.annual[k]||0);el.append(label,big,sub,yr);$('stats').append(el)}
  if($('chartItem').options.length!==items.length||items.some(k=>![...$('chartItem').options].some(o=>o.value===k)))$('chartItem').replaceChildren(...items.map(k=>new Option(k,k)));
  $('chartItem').value=items.includes(state.chartItem)?state.chartItem:'ネジ';const key=$('chartItem').value;
- const extra=Object.fromEntries(items.filter(k=>!BASE_ITEMS.includes(k)).map(k=>[k,state.monthMode==='average'?(computed.annual[k]||0)/12:(computed.byMonth[(state.month||1)-1][k]||0)]));
+ const extra=Object.fromEntries(items.filter(k=>!BASE_ITEMS.includes(k)).map(k=>[k,state.monthMode==='average'?(computed.annual[k]||0)/12:(computed.byMonth[selectedMonthIndex()][k]||0)]));
  const parent=$('extraStats');parent.replaceChildren();const current=document.createElement('div');makeRewardGroups(current,extra);parent.append(current);
- const yr=document.createElement('details');yr.className='detail-compare';const head=document.createElement('summary');head.textContent='年間の獲得量も表示';yr.append(head);const annual=document.createElement('div');makeRewardGroups(annual,Object.fromEntries(items.filter(k=>!BASE_ITEMS.includes(k)).map(k=>[k,computed.annual[k]||0])));yr.append(annual);parent.append(yr);
+ const yr=document.createElement('details');yr.className='detail-compare';const head=document.createElement('summary');head.textContent='12か月の獲得量も表示';yr.append(head);const annual=document.createElement('div');makeRewardGroups(annual,Object.fromEntries(items.filter(k=>!BASE_ITEMS.includes(k)).map(k=>[k,computed.annual[k]||0])));yr.append(annual);parent.append(yr);
  $('extraRewardsCount').textContent='（'+items.filter(k=>!BASE_ITEMS.includes(k)&&(computed.annual[k]||0)!==0).length+'種類）';
  const vs=computed.byMonth.map(o=>o[key]||0);const mx=Math.max(1,...vs);
 
- $('monthChart').replaceChildren(...vs.map((v,i)=>{const box=document.createElement('div');box.className='month';const num=document.createElement('div');num.className='num';num.textContent=fmt(v);num.title=fmt(v);const bars=document.createElement('div');bars.className='bars';const bar=document.createElement('div');bar.className='bar';bar.style.height=(100*v/mx)+'%';bars.append(bar);const month=document.createElement('div');month.className='number';month.textContent=i+1+'月';box.append(num,bars,month);return box}));
+ $('monthChart').replaceChildren(...vs.map((v,i)=>{const box=document.createElement('div');box.className='month';const num=document.createElement('div');num.className='num';num.textContent=fmt(v);num.title=fmt(v);const bars=document.createElement('div');bars.className='bars';const bar=document.createElement('div');bar.className='bar';bar.style.height=(100*v/mx)+'%';bars.append(bar);const month=document.createElement('div');month.className='number';month.textContent=(currentPeriod()+i)%12+1+'月';month.title=monthLabel(currentPeriod()+i);box.append(num,bars,month);return box}));
 }
 function renderRows(computed){const tbody=$('questRows');tbody.replaceChildren();const index=new Map(data.map(q=>[q.id,q]));
  for(const {q,depth} of treeOrdered().filter(({q})=>matching(q))){const unlocked=isUnlocked(q);const tr=document.createElement('tr');if(!q.active)tr.classList.add('inactive');if(!unlocked)tr.classList.add('blocked');
@@ -399,7 +406,7 @@ function fillComparisonControls(preferLatest=false){
 }
 function deltaLabel(value){const num=round(value);return (num>0?'+':'')+fmt(num)}
 function changeClass(value){return value>0?'delta-up':value<0?'delta-down':'delta-zero'}
-function compareMonthTotal(result,key){return state.monthMode==='average'?(result.annual[key]||0)/12:result.byMonth[Number(state.month)-1]?.[key]||0}
+function compareMonthTotal(result,key){return state.monthMode==='average'?(result.annual[key]||0)/12:result.byMonth[selectedMonthIndex()]?.[key]||0}
 function createComparisonTable(headers,rows,classes=''){const wrap=document.createElement('div');wrap.className='tableWrap';wrap.style.maxHeight='390px';const table=document.createElement('table');table.className='compare-table '+classes;const thead=document.createElement('thead'),head=document.createElement('tr');for(const h of headers){const th=document.createElement('th');th.textContent=h;head.append(th)}thead.append(head);table.append(thead);const tbody=document.createElement('tbody');for(const row of rows){const tr=document.createElement('tr');for(let i=0;i<row.length;i++){const td=document.createElement('td');const value=row[i];if(typeof value==='object'&&value!==null&&value.delta!==undefined){td.textContent=deltaLabel(value.delta);td.className=changeClass(round(value.delta))}else td.textContent=String(value);tr.append(td)}tbody.append(tr)}table.append(tbody);wrap.append(table);return wrap}
 function planChanges(a,b){const aMap=new Map(a.data.map(q=>[q.id,q])),bMap=new Map(b.data.map(q=>[q.id,q]));const changed=[];
  for(const id of new Set([...aMap.keys(),...bMap.keys()])){
@@ -425,20 +432,20 @@ function renderComparison(){
  if(!snapshots.length){const t=document.createElement('p');t.className='muted';t.textContent='条件Aを保存すると、現在の設定や別の保存済み条件と比較できます。';pane.append(t);return}
  const a=comparisonPlan($('compareA').value),b=comparisonPlan($('compareB').value);if(!a||!b)return;
  if($('compareA').value===$('compareB').value){const p=document.createElement('p');p.className='muted';p.textContent='異なる条件を2つ選んでください。';pane.append(p);return}
- const sharedYear=Number(state.year),aCalc=comparisonCalculation($('compareA').value,a,sharedYear),bCalc=comparisonCalculation($('compareB').value,b,sharedYear);
+ const start=currentPeriod(),aCalc=comparisonCalculation($('compareA').value,a,start),bCalc=comparisonCalculation($('compareB').value,b,start);
  const items=[...new Set([...allItems(a.data),...allItems(b.data)])];
  const itemSel=$('compareItem'),picked=itemSel.value;itemSel.replaceChildren(...items.map(k=>new Option(k,k)));itemSel.value=items.includes(picked)?picked:'ネジ';
- const unit=state.monthMode==='average'?'月平均':state.month+'月';
- const summary=document.createElement('p');summary.className='small-title';summary.textContent='獲得見込みの比較（'+sharedYear+'年）';pane.append(summary);
+ const unit=state.monthMode==='average'?'月平均':monthLabel(currentPeriod()+selectedMonthIndex());
+ const summary=document.createElement('p');summary.className='small-title';summary.textContent='獲得見込みの比較（'+periodLabel(start)+'）';pane.append(summary);
  const rows=items.map(k=>[k,fmt(aCalc.annual[k]||0),fmt(bCalc.annual[k]||0),{delta:(bCalc.annual[k]||0)-(aCalc.annual[k]||0)},fmt(compareMonthTotal(aCalc,k)),fmt(compareMonthTotal(bCalc,k)),{delta:compareMonthTotal(bCalc,k)-compareMonthTotal(aCalc,k)}]);
  const primaryRows=rows.filter((row,i)=>BASE_ITEMS.includes(items[i]));
- pane.append(createComparisonTable(['資材','A・年間','B・年間','年間差','A・'+unit,'B・'+unit,unit+'差'],primaryRows));
+ pane.append(createComparisonTable(['資材','A・12か月','B・12か月','12か月差','A・'+unit,'B・'+unit,unit+'差'],primaryRows));
  const extraRows=rows.filter((row,i)=>!BASE_ITEMS.includes(items[i])&&((aCalc.annual[items[i]]||0)!==0||(bCalc.annual[items[i]]||0)!==0));
  const more=document.createElement('details');more.className='detail-compare';const summaryExtra=document.createElement('summary');summaryExtra.textContent='資源・勲章・装備などの比較（'+extraRows.length+'種類）';more.append(summaryExtra);
- if(extraRows.length)more.append(createComparisonTable(['報酬','A・年間','B・年間','年間差','A・'+unit,'B・'+unit,unit+'差'],extraRows));else{const msg=document.createElement('p');msg.className='muted';msg.textContent='追加報酬はありません';more.append(msg)}pane.append(more);
+ if(extraRows.length)more.append(createComparisonTable(['報酬','A・12か月','B・12か月','12か月差','A・'+unit,'B・'+unit,unit+'差'],extraRows));else{const msg=document.createElement('p');msg.className='muted';msg.textContent='追加報酬はありません';more.append(msg)}pane.append(more);
  const grid=document.createElement('div');grid.className='comparison-grid';grid.style.marginTop='14px';
  const left=document.createElement('div');const ltitle=document.createElement('div');ltitle.className='small-title';ltitle.textContent='月別比較：'+itemSel.value;left.append(ltitle);
- const k=itemSel.value;const monthlyRows=Array.from({length:12},(_,i)=>[i+1+'月',fmt(aCalc.byMonth[i][k]||0),fmt(bCalc.byMonth[i][k]||0),{delta:(bCalc.byMonth[i][k]||0)-(aCalc.byMonth[i][k]||0)}]);left.append(createComparisonTable(['月','A','B','B−A'],monthlyRows));grid.append(left);
+ const k=itemSel.value;const monthlyRows=Array.from({length:12},(_,i)=>[monthLabel(currentPeriod()+i),fmt(aCalc.byMonth[i][k]||0),fmt(bCalc.byMonth[i][k]||0),{delta:(bCalc.byMonth[i][k]||0)-(aCalc.byMonth[i][k]||0)}]);left.append(createComparisonTable(['月','A','B','B−A'],monthlyRows));grid.append(left);
  const right=document.createElement('div');const rtitle=document.createElement('div');rtitle.className='small-title';const changes=planChanges(a,b);rtitle.textContent='設定の違い（'+changes.length+'任務）';right.append(rtitle);
  const details=document.createElement('details');details.open=changes.length<=8;const summaryElem=document.createElement('summary');summaryElem.textContent=changes.length?'変更した任務を見る':'任務設定に差はありません';summaryElem.style.cursor='pointer';details.append(summaryElem);
  const list=document.createElement('ul');list.style.paddingLeft='21px';for(const line of changes){const li=document.createElement('li');li.textContent=line;list.append(li)}details.append(list);right.append(details);
@@ -448,7 +455,7 @@ function setupComparison(){
  $('captureSnapshot').addEventListener('click',()=>{
   if(snapshots.length>=8){showNotice('一時保存は最大8件です。不要な条件を削除してから保存してください。',true);return}
   const label=$('snapshotName').value.trim()||'条件 '+(snapshots.length+1);
-  snapshots.push({id:'plan-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),label,data:clone(data),state:clone(state),calculation:snapshotCalculation(compute(),Number(state.year)),savedAt:new Date().toLocaleString('ja-JP')});
+  snapshots.push({id:'plan-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),label,data:clone(data),state:clone(state),calculation:snapshotCalculation(compute(),currentPeriod()),savedAt:new Date().toLocaleString('ja-JP')});
   storeSnapshots();$('snapshotName').value='';fillComparisonControls(true);renderComparison();showNotice('「'+label+'」を一時保存しました。設定を変更すると、保存条件と現在の条件を比較できます。');
  });
  $('compareA').addEventListener('change',renderComparison);$('compareB').addEventListener('change',renderComparison);$('compareItem').addEventListener('change',renderComparison);
@@ -456,7 +463,7 @@ function setupComparison(){
   const id=$('compareA').value;if(id==='current'){showNotice('現在の設定はすでに編集中です。保存済みの条件Aを選んでください。',true);return}
   const s=comparisonPlan(id);if(!s)return;
   if(!confirm('「'+s.label+'」を編集中の設定に復元しますか？ 現在の未保存の変更は上書きされます。'))return;
-  data=clone(s.data);state={...defaultState,...clone(s.state),year:Number($('year').value)};
+  data=clone(s.data);state={...defaultState,...clone(s.state)};delete state.year;
   migrate();backfillRewards(data);cascadeOff();save();location.reload();
  });
  fillComparisonControls();
@@ -479,11 +486,10 @@ function setupControls(){
   let count=0;for(const q of data)if(q.period==='Q'){q.quarterOffset=state.quarterDefaultOffset;count++}
   save();renderAll();showNotice('クォータリー'+count+'件に「各期の'+(state.quarterDefaultOffset+1)+'か月目」を反映しました。');
  });
- for(let y=2024;y<=2035;y++)$('year').append(new Option(y+'年',y));if(![...$('year').options].some(o=>Number(o.value)===Number(state.year)))$('year').append(new Option(state.year+'年',state.year));
- for(let i=1;i<=12;i++){$('monthPicker').append(new Option(i+'月',i));$('addMonth').append(new Option(i+'月',i))}
- $('year').value=state.year;$('monthMode').value=state.monthMode;$('monthPicker').value=state.month;$('treeMode').checked=!!state.treeMode;
+ for(let i=1;i<=12;i++)$('addMonth').append(new Option(i+'月',i));
+  refreshPeriodControls();
+ $('monthMode').value=state.monthMode;$('monthPicker').value=state.month;$('treeMode').checked=!!state.treeMode;
  $('monthPickerWrap').classList.toggle('hidden',state.monthMode!=='actual');
- $('year').addEventListener('change',()=>{state.year=Number($('year').value);save();renderAll()});
  $('monthMode').addEventListener('change',()=>{state.monthMode=$('monthMode').value;$('monthPickerWrap').classList.toggle('hidden',state.monthMode!=='actual');save();renderStats(compute());renderComparison()});
  $('monthPicker').addEventListener('change',()=>{state.month=Number($('monthPicker').value);save();renderStats(compute());renderComparison()});
  $('chartItem').addEventListener('change',()=>{state.chartItem=$('chartItem').value;save();renderStats(compute())});
@@ -512,6 +518,8 @@ function setupControls(){
  setupComparison();
 }
 setupControls();renderAll();
+function refreshRollingPeriod(){if($('monthPicker').dataset.start!==String(currentPeriod()))renderAll();}
+window.addEventListener('focus',refreshRollingPeriod);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshRollingPeriod()});setInterval(refreshRollingPeriod,60000);
 if(migratedDisabled){showNotice('前提任務がOFFだったため、後続'+migratedDisabled+'件をOFFにしました。上流任務をONにすると選択できるようになります。')}
 
 </script>
