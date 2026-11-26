@@ -15,7 +15,9 @@ for (const q of master.quests) {
   }
 }
 for (const q of master.quests) for (const p of q.prerequisites || []) if (!ids.has(p)) throw new Error(q.id + ': missing prerequisite ' + p);
-const output = html.replace(marker, () => 'const SEED=' + JSON.stringify(master.quests).replace(/</g, '\\u003c') + ';');
+const versionMarker = /^const MASTER_VERSION=\d+;$/m;
+if (!versionMarker.test(html)) throw new Error('MASTER_VERSION marker missing');
+const output = html.replace(versionMarker, 'const MASTER_VERSION=' + master.version + ';').replace(marker, () => 'const SEED=' + JSON.stringify(master.quests).replace(/</g, '\\u003c') + ';');
 if (process.argv.includes('--check')) {
   if (output !== html) throw new Error('Embedded master is stale; run node scripts/sync-master.cjs');
 } else fs.writeFileSync(file, output);
