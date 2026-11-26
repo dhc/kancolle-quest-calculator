@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>艦これ 定期任務 報酬計算器</title>
+<title>艦これ 定期任務 収支計算器</title>
 <style>
 :root{color-scheme:dark;--bg:#111827;--panel:#1c2637;--panel2:#222f42;--edge:#334155;--text:#edf2f8;--sub:#aebdd0;--accent:#8dc6ff;--green:#a1e8c7;--red:#fbb6b6}
 *{box-sizing:border-box} body{font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic","Meiryo",sans-serif;background:var(--bg);color:var(--text);margin:0;font-size:14px;line-height:1.55}
@@ -40,7 +40,7 @@ input[type="text"],input[type="number"],select,textarea{background:#111b2c;color
 </style>
 </head>
 <body><main>
-<div class="header"><div><h1>艦これ 定期任務 資材計算器 <span class="pill" id="countBadge"></span></h1><p>実施する任務・実施頻度・選択報酬を設定して、ネジ・釘などの主要資材を月別・12か月で集計します。資源・勲章・装備・各種アイテムは詳細欄にまとめて表示します。データと設定はこのブラウザ内に保存され、外部送信されません。</p></div><span class="tag">試作版 v4 / 2026-11</span></div>
+<div class="header"><div><h1>艦これ 定期任務 収支計算器 <span class="pill" id="countBadge"></span></h1><p>実施する任務・実施頻度・選択報酬を設定して、ネジ・釘などの主要資材を月別・12か月で集計します。資源・勲章・装備・各種アイテムは詳細欄にまとめて表示します。データと設定はこのブラウザ内に保存され、外部送信されません。</p></div><span class="tag">v5 / 2026-11</span></div>
 <section class="panel">
  <div class="selectline"><span id="periodLabel" class="pill"></span><label>月間表示 <select id="monthMode"><option value="average">月平均（今後12か月）</option><option value="actual">指定月</option></select></label><label id="monthPickerWrap" class="hidden">対象月 <select id="monthPicker"></select></label></div>
  <p class="muted">デイリーは週あたりの実施日数を指定、ウィークリーは月あたりの週数を指定、クォータリーは各期の実施月、イヤーリーは実施月を任務ごとに指定します。週は月曜日始まり。今月の月初から12か月間を集計します。月平均は12か月合計÷12です。</p>
