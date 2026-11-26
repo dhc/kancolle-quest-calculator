@@ -135,11 +135,11 @@ const PERIOD_LABEL={D:'日',W:'週',M:'月',Q:'季',Y:'年'};
 const PER_RANK={D:0,W:1,M:2,Q:3,Y:4};
 const CATEGORY_COLORS={'編成':'#a57a52','出撃':'#dc5555','演習':'#50b76a','遠征':'#4b9bd9','補給/入渠':'#d9b64b','工廠':'#a47acb','改装':'#4cb9bb','その他':'#8795a8','手動追加':'#8795a8'};
 function categoryOf(q){return q.category||'その他'}
-function normalizeFrequency(q){if(q.period==='D'){const n=Array.isArray(q.dailyWeekdays)?q.dailyWeekdays.length:Number.isInteger(q.dailyDaysPerWeek)?q.dailyDaysPerWeek:7;q.dailyWeekdays=[...PRESET_DAYS[Math.max(0,Math.min(7,n))]];delete q.dailyDaysPerWeek;}delete q.completion;return q;}
+function normalizeFrequency(q){if(q.period==='D'&&q.dateDigits?.length){q.occurrenceRate=[25,50,75,100].includes(q.occurrenceRate)?q.occurrenceRate:100;delete q.dailyWeekdays;delete q.dailyDaysPerWeek;}else if(q.period==='D'){const n=Array.isArray(q.dailyWeekdays)?q.dailyWeekdays.length:Number.isInteger(q.dailyDaysPerWeek)?q.dailyDaysPerWeek:7;q.dailyWeekdays=[...PRESET_DAYS[Math.max(0,Math.min(7,n))]];delete q.dailyDaysPerWeek;}delete q.completion;return q;}
 // Nested representative weekdays ensure a lower frequency is a subset of a higher one.
 const PRESET_DAYS={0:[],1:[1],2:[1,5],3:[1,3,5],4:[1,3,4,5],5:[1,2,3,4,5],6:[1,2,3,4,5,6],7:[0,1,2,3,4,5,6]};
 const round=v=>Number(v.toFixed(2));
-const fmt=v=>Number(v).toLocaleString('ja-JP',{maximumFractionDigits:1});
+const fmt=v=>Number(v).toLocaleString('ja-JP',{maximumFractionDigits:2});
 const $=id=>document.getElementById(id);
 const clone=v=>structuredClone(v);
 let data, state;
@@ -147,9 +147,9 @@ let oldFormat=false;
 let saved=null;
 try{saved=JSON.parse(localStorage.getItem(KEY));}catch(e){}
 if(!saved){try{saved=JSON.parse(localStorage.getItem(OLD_KEY));oldFormat=!!saved;}catch(e){}}
-function defaultQuest(q){const out=clone(q);out.active=false;if(out.period==='D')out.dailyWeekdays=[0,1,2,3,4,5,6];if(out.period==='W'){out.weeklyWeeksPerMonth='all';out.weeklyPlacement='first'}if(out.period==='Q')out.quarterOffset=0;if(out.period==='Y')out.executionMonth=out.startMonth||1;for(const g of out.choiceGroups||[])g.selected=0;return out}
-function hydrateMaster(saved,seed=SEED){const hidden=new Set(saved?.hiddenMasterIds||[]);return [...seed.filter(q=>!hidden.has(q.id)).map(q=>{const out=defaultQuest(q),patch=saved?.overridesById?.[q.id]||{},settings=saved?.settingsById?.[q.id]||{};Object.assign(out,clone(patch));for(const key of ['active','dailyWeekdays','weeklyWeeksPerMonth','weeklyPlacement','quarterOffset','executionMonth','prerequisites'])if(Object.hasOwn(settings,key))out[key]=clone(settings[key]);for(const [i,g] of (out.choiceGroups||[]).entries()){const choice=settings.choices?.[i];const j=g.options.findIndex(o=>JSON.stringify(o.rewards)===choice);g.selected=j>=0?j:0}return out}),...clone(saved?.customQuests||[])]}
-function packUserData(source,seed=SEED){const defaults=new Map(seed.map(q=>[q.id,defaultQuest(q)])),settingsById=Object.create(null),overridesById=Object.create(null),customQuests=[],present=new Set();const keys=new Set(['active','dailyWeekdays','weeklyWeeksPerMonth','weeklyPlacement','quarterOffset','executionMonth','prerequisites']);for(const q of source){present.add(q.id);const d=defaults.get(q.id);if(!d){customQuests.push(clone(q));continue}const settings={},patch={};for(const [k,v] of Object.entries(q)){if(k==='choiceGroups'){const bare=gs=>(gs||[]).map(({selected,...g})=>g);if(JSON.stringify(bare(v))!==JSON.stringify(bare(d[k])))patch[k]=clone(bare(v));settings.choices=v.map(g=>JSON.stringify(g.options[g.selected||0]?.rewards));continue}if(JSON.stringify(v)===JSON.stringify(d[k]))continue;(keys.has(k)?settings:patch)[k]=clone(v)}if(Object.keys(settings).length)settingsById[q.id]=settings;if(Object.keys(patch).length)overridesById[q.id]=patch}return{settingsById,overridesById,customQuests,hiddenMasterIds:seed.filter(q=>!present.has(q.id)).map(q=>q.id)}}
+function defaultQuest(q){const out=clone(q);out.active=false;if(out.period==='D'){if(out.dateDigits?.length)out.occurrenceRate=100;else out.dailyWeekdays=[0,1,2,3,4,5,6];}if(out.period==='W'){out.weeklyWeeksPerMonth='all';out.weeklyPlacement='first'}if(out.period==='Q')out.quarterOffset=0;if(out.period==='Y')out.executionMonth=out.startMonth||1;for(const g of out.choiceGroups||[])g.selected=0;return out}
+function hydrateMaster(saved,seed=SEED){const hidden=new Set(saved?.hiddenMasterIds||[]);return [...seed.filter(q=>!hidden.has(q.id)).map(q=>{const out=defaultQuest(q),patch=saved?.overridesById?.[q.id]||{},settings=saved?.settingsById?.[q.id]||{};Object.assign(out,clone(patch));for(const key of ['active','dailyWeekdays','occurrenceRate','weeklyWeeksPerMonth','weeklyPlacement','quarterOffset','executionMonth','prerequisites'])if(Object.hasOwn(settings,key))out[key]=clone(settings[key]);for(const [i,g] of (out.choiceGroups||[]).entries()){const choice=settings.choices?.[i];const j=g.options.findIndex(o=>JSON.stringify(o.rewards)===choice);g.selected=j>=0?j:0}return out}),...clone(saved?.customQuests||[])]}
+function packUserData(source,seed=SEED){const defaults=new Map(seed.map(q=>[q.id,defaultQuest(q)])),settingsById=Object.create(null),overridesById=Object.create(null),customQuests=[],present=new Set();const keys=new Set(['active','dailyWeekdays','occurrenceRate','weeklyWeeksPerMonth','weeklyPlacement','quarterOffset','executionMonth','prerequisites']);for(const q of source){present.add(q.id);const d=defaults.get(q.id);if(!d){customQuests.push(clone(q));continue}const settings={},patch={};for(const [k,v] of Object.entries(q)){if(k==='choiceGroups'){const bare=gs=>(gs||[]).map(({selected,...g})=>g);if(JSON.stringify(bare(v))!==JSON.stringify(bare(d[k])))patch[k]=clone(bare(v));settings.choices=v.map(g=>JSON.stringify(g.options[g.selected||0]?.rewards));continue}if(JSON.stringify(v)===JSON.stringify(d[k]))continue;(keys.has(k)?settings:patch)[k]=clone(v)}if(Object.keys(settings).length)settingsById[q.id]=settings;if(Object.keys(patch).length)overridesById[q.id]=patch}return{settingsById,overridesById,customQuests,hiddenMasterIds:seed.filter(q=>!present.has(q.id)).map(q=>q.id)}}
 data=hydrateMaster(saved);
 const today=new Date();
 function monthSerial(dt){return dt.getFullYear()*12+dt.getMonth()}
@@ -202,6 +202,7 @@ function validate(input){
   }
   if(q.choiceGroups?.some(g=>!Array.isArray(g.options)||!g.options.length||g.options.some(o=>typeof o.label!=='string')))throw Error(q.name+': 選択報酬が不正です');
   if(q.prerequisites!==undefined&&(!Array.isArray(q.prerequisites)||q.prerequisites.some(x=>typeof x!=='string')||new Set(q.prerequisites).size!==q.prerequisites.length))throw Error(q.name+': prerequisitesが不正です');
+  if(q.occurrenceRate!==undefined&&(!q.dateDigits?.length||![25,50,75,100].includes(q.occurrenceRate)))throw Error(q.name+': 実施割合が不正です');
   if(q.dailyWeekdays!==undefined&&(!Array.isArray(q.dailyWeekdays)||q.dailyWeekdays.some(x=>!Number.isInteger(x)||x<0||x>6)||new Set(q.dailyWeekdays).size!==q.dailyWeekdays.length))throw Error(q.name+': dailyWeekdaysは0（日）～6（土）の配列です');
   if(q.weeklyWeeksPerMonth!==undefined&&q.weeklyWeeksPerMonth!=='all'&&(!Number.isInteger(q.weeklyWeeksPerMonth)||q.weeklyWeeksPerMonth<0||q.weeklyWeeksPerMonth>5))throw Error(q.name+': weeklyWeeksPerMonthが不正です');
   if(q.weeklyPlacement!==undefined&&!['first','last'].includes(q.weeklyPlacement))throw Error(q.name+': weeklyPlacementが不正です');
@@ -242,7 +243,7 @@ function periodKey(dt,period,startMonth){if(period==='D')return ds(dt);if(period
 function cycleKey(dt,child,parent){const p=PER_RANK[child.period]>=PER_RANK[parent.period]?child.period:parent.period;const annualStart=p==='Y'?(child.period==='Y'?child.startMonth:parent.startMonth):1;return periodKey(dt,p,annualStart)}
 function basicEvents(q,fromYear,toYear){const events=[];for(let y=fromYear;y<=toYear;y++)for(let m=1;m<=12;m++){
  const last=new Date(y,m,0).getDate();
- if(q.period==='D')for(let d=1;d<=last;d++){const dt=date(y,m,d);if((q.dailyWeekdays||PRESET_DAYS[7]).includes(dt.getDay())&&(!q.dateDigits||q.dateDigits.includes(d%10)))events.push(dt)}
+ if(q.period==='D')for(let d=1;d<=last;d++){const dt=date(y,m,d);if(q.dateDigits?.length?q.dateDigits.includes(d%10):(q.dailyWeekdays||PRESET_DAYS[7]).includes(dt.getDay()))events.push(dt)}
  if(q.period==='W'){
   const mondays=[];for(let d=1;d<=last;d++){const dt=date(y,m,d);if(dt.getDay()===1)mondays.push(dt)}
   const count=q.weeklyWeeksPerMonth==='all'?mondays.length:Math.min(mondays.length,Number(q.weeklyWeeksPerMonth)||0);
@@ -270,7 +271,7 @@ function buildSchedule(start,source=data){const year=Math.floor(start/12),endYea
   else if(!active)list=[];
   else{
    const keys=parents.map((p,i)=>new Set(upstream[i].map(d=>cycleKey(d,q,p))));
-   list=basicEvents(q,year-1,endYear+1).filter(d=>parents.every((p,i)=>keys[i].has(cycleKey(d,q,p))));
+   list=basicEvents(q,year-1,endYear+1).filter(d=>q.period==='D'&&q.dateDigits?.length||parents.every((p,i)=>keys[i].has(cycleKey(d,q,p))));
   }
   next.set(q.id,{signature,upstream,list});
   visiting.delete(q.id);cache.set(q.id,list);return list;
@@ -282,9 +283,10 @@ function computeFor(source,start){const schedule=buildSchedule(start,source);con
  const rowCounts=new Map();let enabled=0;
  for(const q of source){if(!q.active)continue;enabled++;
   const dates=(schedule.get(q.id)||[]).filter(d=>monthSerial(d)>=start&&monthSerial(d)<start+12);
-  rowCounts.set(q.id,dates.length);
+  const weight=q.period==='D'&&q.dateDigits?.length?(q.occurrenceRate??100)/100:1;
+  rowCounts.set(q.id,dates.length*weight);
   const reward=rewardOf(q),cost=costOf(q);
-  for(const d of dates){const i=monthSerial(d)-start;for(const [k,v] of Object.entries(reward)){incomeByMonth[i][k]+=v;byMonth[i][k]+=v;}for(const [k,v] of Object.entries(cost)){costByMonth[i][k]+=v;byMonth[i][k]-=v;}}
+  for(const d of dates){const i=monthSerial(d)-start;for(const [k,v] of Object.entries(reward)){incomeByMonth[i][k]+=v*weight;byMonth[i][k]+=v*weight;}for(const [k,v] of Object.entries(cost)){costByMonth[i][k]+=v*weight;byMonth[i][k]-=v*weight;}}
  }
  const sum=months=>{const out=blank();for(const month of months)for(const [k,v] of Object.entries(month))out[k]+=v;return out;};
  return{annual:sum(byMonth),byMonth,incomeAnnual:sum(incomeByMonth),costAnnual:sum(costByMonth),incomeByMonth,costByMonth,rowCounts,enabled};
@@ -292,7 +294,7 @@ function computeFor(source,start){const schedule=buildSchedule(start,source);con
 let currentCalculation=null;
 function compute(){const start=currentPeriod(),signature=JSON.stringify(data);if(!currentCalculation||currentCalculation.start!==start||currentCalculation.signature!==signature)currentCalculation={start,signature,result:computeFor(data,start)};return currentCalculation.result;}
 // Snapshot results are immutable until their year or calculation version changes.
-const CALC_VERSION=6;
+const CALC_VERSION=7;
 function snapshotCalculation(result,start){return{version:CALC_VERSION,start,annual:result.annual,byMonth:result.byMonth,incomeAnnual:result.incomeAnnual,costAnnual:result.costAnnual,incomeByMonth:result.incomeByMonth,costByMonth:result.costByMonth,rowCounts:[...result.rowCounts],enabled:result.enabled};}
 function comparisonCalculation(id,plan,start){if(id==='current')return compute();const cached=plan.calculation;if(cached?.version===CALC_VERSION&&cached.start===start&&cached.annual&&Array.isArray(cached.byMonth)&&cached.byMonth.length===12)return cached;plan.calculation=snapshotCalculation(computeFor(plan.data,start),start);storeSnapshots();return plan.calculation;}
 function textOfRewards(rewards){return Object.entries(rewards||{}).filter(([,v])=>v).map(([k,v])=>k+' '+(v>0?'+':'')+fmt(v)).join(' / ')||'—'}
@@ -305,6 +307,7 @@ function createSelect(options,current,callback){const sel=document.createElement
 function labelWrap(label,child){const wrap=document.createElement('label');wrap.className='field';const head=document.createElement('span');head.className='tasklabel';head.textContent=label;wrap.append(head,child);return wrap}
 // Frequency edits cascade in the direction of the change, without toggling active flags.
 function frequencyValue(q){
+ if(q.period==='D'&&q.dateDigits?.length)return null;
  if(q.period==='D')return (q.dailyWeekdays||PRESET_DAYS[7]).length;
  if(q.period==='W')return (q.weeklyWeeksPerMonth??'all')==='all'?5:Number(q.weeklyWeeksPerMonth);
  return null;
@@ -328,6 +331,7 @@ function changeLinkedFrequency(source,target,value){
   for(const n of neighbors){
    if(!n||n.period!==target.period)continue;
    const current=frequencyValue(n);
+   if(current===null)continue;
    if(increasing?current<bound:current>bound)writeFrequency(n,bound===5&&target.period==='W'&&target.weeklyWeeksPerMonth==='all'?'all':bound);
    walk(n,bound);
   }
@@ -335,7 +339,10 @@ function changeLinkedFrequency(source,target,value){
  walk(target,after);
 }
 function scheduleControl(q){const wrap=document.createElement('div');wrap.className='schedule';
- if(q.period==='D'){
+ if(q.period==='D'&&q.dateDigits?.length){
+  wrap.append(createSelect([[100,'全て実施（100%）'],[75,'おおむね実施（75%）'],[50,'半分程度（50%）'],[25,'たまに実施（25%）']],q.occurrenceRate??100,v=>{q.occurrenceRate=Number(v);save();renderAll()}));
+  const hint=document.createElement('span');hint.className='tasklabel';hint.textContent='出現日に対する実施割合（期待値）';wrap.append(hint);
+ }else if(q.period==='D'){
   const weekdays=q.dailyWeekdays||PRESET_DAYS[7];
   const count=createSelect(Array.from({length:8},(_,n)=>[n,'週'+n+'日']),weekdays.length,value=>{changeLinkedFrequency(data,q,Number(value));save();renderAll()});
   wrap.append(count);
@@ -437,10 +444,11 @@ function planChanges(a,b){const aMap=new Map(a.data.map(q=>[q.id,q])),bMap=new M
   const qa=aMap.get(id),qb=bMap.get(id);
   if(!qa){changed.push('追加：'+qb.name);continue}
   if(!qb){changed.push('削除：'+qa.name);continue}
-  const fmtPlan=q=>JSON.stringify({active:!!q.active,days:q.dailyWeekdays,weeks:q.weeklyWeeksPerMonth,placement:q.weeklyPlacement,quarter:q.quarterOffset,yearMonth:q.executionMonth,choice:(q.choiceGroups||[]).map(g=>g.selected||0),parents:q.prerequisites,rewards:q.rewards,costs:q.costs,discard:q.discard,requirements:q.requirements});
+  const fmtPlan=q=>JSON.stringify({active:!!q.active,days:q.dailyWeekdays,rate:q.dateDigits?.length?(q.occurrenceRate??100):undefined,weeks:q.weeklyWeeksPerMonth,placement:q.weeklyPlacement,quarter:q.quarterOffset,yearMonth:q.executionMonth,choice:(q.choiceGroups||[]).map(g=>g.selected||0),parents:q.prerequisites,rewards:q.rewards,costs:q.costs,discard:q.discard,requirements:q.requirements});
   if(fmtPlan(qa)===fmtPlan(qb))continue;
   const notes=[];
   if(!!qa.active!==!!qb.active)notes.push((qa.active?'ON':'OFF')+' → '+(qb.active?'ON':'OFF'));
+  if((qa.dateDigits?.length||qb.dateDigits?.length)&&(qa.occurrenceRate??100)!==(qb.occurrenceRate??100))notes.push('実施割合 '+(qa.occurrenceRate??100)+'% → '+(qb.occurrenceRate??100)+'%');
   if(JSON.stringify(qa.dailyWeekdays)!==JSON.stringify(qb.dailyWeekdays))notes.push('週'+(qa.dailyWeekdays||[]).length+'日→週'+(qb.dailyWeekdays||[]).length+'日');
   if(qa.weeklyWeeksPerMonth!==qb.weeklyWeeksPerMonth||qa.weeklyPlacement!==qb.weeklyPlacement)notes.push('週の実施回数・位置変更');
   if(qa.quarterOffset!==qb.quarterOffset)notes.push('クォータリーの実施月変更');
@@ -502,7 +510,7 @@ function setupControls(){
  $('defaultQuarterOffset').addEventListener('change',()=>{state.quarterDefaultOffset=Number($('defaultQuarterOffset').value);save()});
  $('applyDailyDefault').addEventListener('click',()=>{
   const days=clone(PRESET_DAYS[state.dailyDefaultDays]);let count=0;
-  for(const q of data)if(q.period==='D'){q.dailyWeekdays=clone(days);count++}
+  for(const q of data)if(q.period==='D'&&!q.dateDigits?.length){q.dailyWeekdays=clone(days);count++}
   save();renderAll();showNotice('デイリー'+count+'件に「週'+state.dailyDefaultDays+'日」を反映しました。個別設定は後から調整できます。');
  });
  $('applyQuarterDefault').addEventListener('click',()=>{
