@@ -1,0 +1,14 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const master=JSON.parse(fs.readFileSync(path.join(root,'data/quests.json'),'utf8'));
+const j=fs.readFileSync(path.join(root,'index.html'),'utf8').split('<script>')[1].split('</script>')[0];
+new Function(j);
+const constants=j.split('\n').filter(x=>/^const (BASE_ITEMS|PER_RANK|PRESET_DAYS|SEED|MASTER_VERSION)=/.test(x)).join('\n');
+const e=new Function(constants+'\nconst clone=v=>JSON.parse(JSON.stringify(v));\nfunction monthSerial(dt){return dt.getFullYear()*12+dt.getMonth()}\n'+j.slice(j.indexOf('function defaultQuest'),j.indexOf('data=hydrateMaster(saved)'))+'\n'+j.slice(j.indexOf('function validate'),j.indexOf('try{validate(data)'))+'\n'+j.slice(j.indexOf('function allItems'),j.indexOf('function compute()'))+'\nreturn {computeFor,validate,hydrateMaster,packUserData,SEED,MASTER_VERSION};')();
+test('embedded master, ID uniqueness, dependency graph, periods',()=>{assert.deepEqual(e.SEED,master.quests);assert.equal(e.MASTER_VERSION,master.version);e.validate(e.hydrateMaster(null));assert.equal(new Set(e.SEED.map(q=>q.wikiId)).size,e.SEED.length);for(const q of e.SEED){assert.match(q.id,/^\d+$/);if(q.period==='Y')assert.ok(q.startMonth>=1&&q.startMonth<=12)}});
+test('all-active annual and monthly net identities',()=>{const d=e.hydrateMaster(null);d.forEach(q=>q.active=true);const r=e.computeFor(d,2026*12+10);for(const q of d)assert.ok(r.rowCounts.get(q.id)>0,q.wikiId);for(const k of Object.keys(r.annual)){assert.ok(Number.isFinite(r.annual[k]));assert.equal(r.annual[k],r.incomeAnnual[k]-r.costAnnual[k]);for(let i=0;i<12;i++)assert.equal(r.byMonth[i][k],r.incomeByMonth[i][k]-r.costByMonth[i][k])}assert.equal(r.rowCounts.get('211'),107);assert.equal(r.rowCounts.get('212'),72);assert.equal(r.rowCounts.get('637'),4)});
+test('direct costs, choices, and non-consuming requirements',()=>{const d=[{id:'1',name:'test',period:'M',active:true,rewards:{ネジ:3},costs:{ネジ:1},discard:{装備:2},requirements:{所持装備:1},choiceGroups:[{selected:1,options:[{rewards:{ネジ:1}},{rewards:{ネジ:2}}]}]}];const r=e.computeFor(d,2026*12+10);assert.equal(r.annual.ネジ,48);assert.equal(r.annual.装備,-24);assert.equal(r.annual.所持装備,undefined)});
+test('settings round trip and fresh master updates',()=>{const d=e.hydrateMaster(null);d[0].active=true;d[0].dailyWeekdays=[1,3,5];const q=d.find(x=>x.choiceGroups?.length);q.choiceGroups[0].selected=1;d.push({id:'custom-1',name:'custom',period:'M',rewards:{},active:true});const packed=e.packUserData(d);assert.deepEqual(e.hydrateMaster(packed),d);const seed=JSON.parse(JSON.stringify(e.SEED));seed[0].rewards.燃料=999;assert.equal(e.hydrateMaster(packed,seed)[0].rewards.燃料,999);assert.equal(e.hydrateMaster(packed,seed)[0].active,true)});
